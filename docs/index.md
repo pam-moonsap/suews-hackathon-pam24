@@ -31,16 +31,15 @@ mean of those point-by-point flux changes after the 14-day spin-up, while the
 lower panel keeps T2 as absolute present and +2.5 C scenario air-temperature
 curves.
 
-## Seasonal Diurnal Check
+## Spring Diurnal Check
 
-![Four-panel seasonal diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
+![Spring-only diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
 
-I repeated the same pairing logic by meteorological season in a separate output:
-heat-flux terms are still calculated as point-by-point `future - present`
-changes, and T2 remains absolute present and +2.5 C scenario air temperature.
-The current compact hourly analysis only contains spring hours after spin-up, so
-the other three panels are deliberately marked as unavailable rather than filled
-with invented seasonal data.
+The saved hourly analysis only contains spring hours after spin-up, so this
+figure shows Spring only. Heat-flux terms are still calculated as point-by-point
+`future - present` changes, and T2 remains absolute present and +2.5 C scenario
+air temperature. The seasonal coverage file is kept as the audit trail showing
+that no winter, summer, or autumn hours are available in the current run.
 
 ## Surface Energy Balance Across Land-Cover Zones
 
@@ -57,9 +56,9 @@ marks the most built-up core.
 - [Hourly QH, QE, QN, QS, and T2 for present and +2.5 C runs](hourly_fluxes_t2_present_future.csv)
 - [Point-by-point high-risk-zone future-minus-present heat-flux deltas](hourly_deltas_high_risk_zone.csv)
 - [Diurnal high-risk-zone future-minus-present heat-flux deltas](diurnal_deltas_high_risk_zone.csv)
-- [Seasonal point-by-point high-risk-zone heat-flux deltas](seasonal_hourly_deltas_high_risk_zone.csv)
-- [Seasonal diurnal high-risk-zone heat-flux deltas](seasonal_diurnal_flux_deltas_high_risk_zone.csv)
-- [Seasonal diurnal high-risk-zone T2 curves](seasonal_diurnal_t2_high_risk_zone.csv)
+- [Spring point-by-point high-risk-zone heat-flux deltas](seasonal_hourly_deltas_high_risk_zone.csv)
+- [Spring diurnal high-risk-zone heat-flux deltas](seasonal_diurnal_flux_deltas_high_risk_zone.csv)
+- [Spring diurnal high-risk-zone T2 curves](seasonal_diurnal_t2_high_risk_zone.csv)
 - [Seasonal data coverage check](seasonal_data_coverage_high_risk_zone.csv)
 - [Land-cover zone summary](landcover_zone_summary.csv)
 - [Meteorology summary](meteorology_summary.csv)

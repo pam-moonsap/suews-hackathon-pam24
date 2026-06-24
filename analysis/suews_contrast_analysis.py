@@ -355,84 +355,73 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         "future_plus_2p5c": "+2.5 C T2",
     }
 
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=True)
-    axes_flat = axes.ravel()
-    t2_axes = []
-    for ax, season in zip(axes_flat, SEASON_ORDER):
-        ax2 = ax.twinx()
-        t2_axes.append(ax2)
-        season_delta = diurnal[diurnal["season"].eq(season)]
-        season_t2 = t2_diurnal[t2_diurnal["season"].eq(season)]
+    spring_delta = diurnal[diurnal["season"].eq("Spring")]
+    spring_t2 = t2_diurnal[t2_diurnal["season"].eq("Spring")]
+    spring_coverage = coverage[
+        coverage["season"].eq("Spring") & coverage["scenario"].eq("present")
+    ].iloc[0]
 
-        ax.set_title(season, loc="left", fontsize=13, weight="bold")
-        ax.set_xlim(0, 23)
-        ax.set_xticks(range(0, 24, 3))
-        ax.grid(True, color="#d9d9d9", linewidth=0.8, alpha=0.8)
-        ax.spines[["top", "right"]].set_visible(False)
-        ax2.spines["top"].set_visible(False)
+    fig, ax = plt.subplots(figsize=(11, 7))
+    ax2 = ax.twinx()
+    ax.set_title(
+        "Spring diurnal response",
+        loc="left",
+        fontsize=14,
+        weight="bold",
+    )
+    ax.set_xlim(0, 23)
+    ax.set_xticks(range(0, 24, 2))
+    ax.set_xlabel("Local hour")
+    ax.set_ylabel("Flux change (W m$^{-2}$)")
+    ax2.set_ylabel("T2 air temperature (deg C)")
+    ax.grid(True, color="#d9d9d9", linewidth=0.8, alpha=0.8)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax2.spines["top"].set_visible(False)
 
-        if season_delta.empty or season_t2.empty:
-            ax.text(
-                0.5,
-                0.52,
-                "No data in current run",
-                transform=ax.transAxes,
-                ha="center",
-                va="center",
-                fontsize=12,
-                color="#666666",
-            )
-            ax.text(
-                0.5,
-                0.43,
-                "Current hourly output only covers spring",
-                transform=ax.transAxes,
-                ha="center",
-                va="center",
-                fontsize=10,
-                color="#777777",
-            )
-            ax2.set_yticks([])
-            continue
-
+    if spring_delta.empty or spring_t2.empty:
+        ax.text(
+            0.5,
+            0.5,
+            "No Spring data in current run",
+            transform=ax.transAxes,
+            ha="center",
+            va="center",
+            fontsize=12,
+            color="#666666",
+        )
+    else:
         for col in ["QN", "QS", "QE", "QH"]:
             ax.plot(
-                season_delta["hour"],
-                season_delta[col],
+                spring_delta["hour"],
+                spring_delta[col],
                 color=flux_colors[col],
-                linewidth=2.2,
+                linewidth=2.5,
             )
         for scenario in ["present", "future_plus_2p5c"]:
-            group = season_t2[season_t2["scenario"].eq(scenario)]
+            group = spring_t2[spring_t2["scenario"].eq(scenario)]
             ax2.plot(
                 group["hour"],
                 group["T2"],
                 color=t2_colors[scenario],
-                linewidth=2.3,
+                linewidth=2.6,
                 linestyle="--",
             )
-
-        season_coverage = coverage[
-            coverage["season"].eq(season) & coverage["scenario"].eq("present")
-        ].iloc[0]
+        ax.axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
         ax.text(
             0.02,
-            0.95,
-            f"{season_coverage['n_hours']} hourly values",
+            0.96,
+            (
+                "Spring only\n"
+                f"{spring_coverage['first_time']} to {spring_coverage['last_time']}\n"
+                f"{spring_coverage['n_hours']} hourly values after spin-up"
+            ),
             transform=ax.transAxes,
             ha="left",
             va="top",
             fontsize=10,
-            color="#555555",
+            color="#444444",
+            bbox={"facecolor": "white", "edgecolor": "#dddddd", "alpha": 0.86, "pad": 6},
         )
-        ax.axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
-
-    for ax in axes[:, 0]:
-        ax.set_ylabel("Flux change (W m$^{-2}$)")
-    for ax2 in [t2_axes[1], t2_axes[3]]:
-        ax2.set_ylabel("T2 air temperature (deg C)")
-    for ax in axes[1, :]:
-        ax.set_xlabel("Local hour")
 
     handles = [
         *[
@@ -452,14 +441,14 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         ],
     ]
     fig.suptitle(
-        f"Seasonal diurnal response: {zone_name} (gridiv {grid})",
-        x=0.06,
+        f"Spring-only diurnal response: {zone_name} (gridiv {grid})",
+        x=0.02,
         ha="left",
         fontsize=16,
         weight="bold",
     )
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, 0.94), ncols=6, frameon=False)
-    fig.subplots_adjust(top=0.85, hspace=0.28, wspace=0.22)
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.55, 0.89), ncols=6, frameon=False)
+    fig.subplots_adjust(top=0.78, left=0.09, right=0.88, bottom=0.12)
 
     png = DOCS / "seasonal_diurnal_high_risk_zone.png"
     svg = DOCS / "seasonal_diurnal_high_risk_zone.svg"
