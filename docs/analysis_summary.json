@@ -8,5 +8,6 @@
   "high_risk_name": "Kampong Lama",
   "diurnal_plot": "diurnal_high_risk_zone.png",
   "seasonal_diurnal_plot": "seasonal_diurnal_high_risk_zone.png",
+  "risk_matrix_plot": "heat_risk_matrix.png",
   "energy_balance_plot": "energy_balance_landcover_zones.png"
 }

@@ -21,6 +21,10 @@ FUTURE_FORCING = DATA / "forcing" / "future_hot_humid" / "UDA_2024_data_60.txt"
 SPINUP_DAYS = 14
 ANALYSIS_DAYS = 30
 HEAT_THRESHOLD_C = 35.0
+SCENARIO_LABELS = {
+    "present": "Present",
+    "future_plus_2p5c": "+2.5 C future",
+}
 SEASON_ORDER = ["Winter", "Spring", "Summer", "Autumn"]
 SEASON_BY_MONTH = {
     12: "Winter",
@@ -136,8 +140,8 @@ def forcing_summary(label: str, forcing_df: pd.DataFrame) -> dict[str, float | s
     return summary
 
 
-def vulnerability_index(socio: pd.DataFrame) -> pd.Series:
-    components = pd.DataFrame(
+def vulnerability_components(socio: pd.DataFrame) -> pd.DataFrame:
+    return pd.DataFrame(
         {
             "elderly": socio["frac_over65"],
             "young": socio["frac_under5"],
@@ -147,7 +151,21 @@ def vulnerability_index(socio: pd.DataFrame) -> pd.Series:
         },
         index=socio.index,
     )
+
+
+def vulnerability_index(socio: pd.DataFrame) -> pd.Series:
+    components = vulnerability_components(socio)
     return minmax(components.mean(axis=1))
+
+
+def risk_level(score: float) -> str:
+    if score >= 0.75:
+        return "Critical"
+    if score >= 0.50:
+        return "High"
+    if score >= 0.25:
+        return "Moderate"
+    return "Low"
 
 
 def risk_table(hourly: pd.DataFrame, neighbourhoods: pd.DataFrame) -> pd.DataFrame:
@@ -178,6 +196,177 @@ def risk_table(hourly: pd.DataFrame, neighbourhoods: pd.DataFrame) -> pd.DataFra
         "risk_rank",
     ]
     return df.reset_index()[["gridiv"] + cols].sort_values("risk_rank")
+
+
+def heat_risk_matrix(hourly: pd.DataFrame, neighbourhoods: pd.DataFrame) -> pd.DataFrame:
+    socio = pd.read_csv(DATA / "socioeconomic.csv").set_index("gridiv")
+    components = vulnerability_components(socio).add_prefix("vuln_")
+    base = neighbourhoods.set_index("gridiv")[
+        [
+            "name",
+            "type",
+            "population_day",
+            "population_night",
+            "bldgs",
+            "green_blue_fraction",
+            "impervious_fraction",
+        ]
+    ].join(components)
+    base["exposure"] = minmax(base["population_day"].astype(float))
+    base["vulnerability"] = vulnerability_index(socio)
+
+    rows = []
+    for scenario in SCENARIO_LABELS:
+        scenario_hourly = hourly[hourly["scenario"].eq(scenario) & hourly["after_spinup"]]
+        hazard = (
+            scenario_hourly.groupby("gridiv")["T2"]
+            .agg(
+                dangerous_heat_hours=lambda s: int((s > HEAT_THRESHOLD_C).sum()),
+                analysis_hours="size",
+                max_t2="max",
+                mean_t2="mean",
+            )
+            .astype({"dangerous_heat_hours": int, "analysis_hours": int})
+        )
+        df = base.join(hazard)
+        df["hazard"] = minmax(df["dangerous_heat_hours"].astype(float))
+        pillars = df[["hazard", "exposure", "vulnerability"]].clip(lower=0)
+        df["risk_index_raw"] = pillars.prod(axis=1) ** (1.0 / 3.0)
+        df["risk_index"] = minmax(df["risk_index_raw"])
+        df["risk_rank"] = df["risk_index"].rank(ascending=False, method="min").astype(int)
+        df["risk_level"] = df["risk_index"].map(risk_level)
+        df["scenario"] = scenario
+        df["scenario_label"] = SCENARIO_LABELS[scenario]
+        rows.append(df.reset_index())
+
+    cols = [
+        "scenario",
+        "scenario_label",
+        "gridiv",
+        "name",
+        "type",
+        "dangerous_heat_hours",
+        "analysis_hours",
+        "max_t2",
+        "mean_t2",
+        "population_day",
+        "hazard",
+        "exposure",
+        "vulnerability",
+        "risk_index",
+        "risk_level",
+        "risk_rank",
+        "vuln_elderly",
+        "vuln_young",
+        "vuln_no_ac",
+        "vuln_outdoor_work",
+        "vuln_deprivation",
+        "bldgs",
+        "green_blue_fraction",
+        "impervious_fraction",
+    ]
+    matrix = pd.concat(rows, ignore_index=True)[cols]
+    scenario_order = {scenario: idx for idx, scenario in enumerate(SCENARIO_LABELS)}
+    matrix["_scenario_order"] = matrix["scenario"].map(scenario_order)
+    matrix = matrix.sort_values(["_scenario_order", "risk_rank", "gridiv"]).drop(
+        columns="_scenario_order"
+    )
+    matrix.to_csv(DOCS / "heat_risk_matrix.csv", index=False)
+    critical = matrix[matrix["risk_level"].eq("Critical")].copy()
+    critical.to_csv(DOCS / "critical_heat_risk_zones.csv", index=False)
+    return matrix
+
+
+def plot_heat_risk_matrix(matrix: pd.DataFrame) -> Path:
+    colors = {
+        "Critical": "#b2182b",
+        "High": "#ef8a62",
+        "Moderate": "#fdb863",
+        "Low": "#4393c3",
+    }
+    fig, axes = plt.subplots(1, 2, figsize=(14, 6), sharex=True, sharey=True)
+    for ax, scenario in zip(axes, SCENARIO_LABELS):
+        scenario_matrix = matrix[matrix["scenario"].eq(scenario)].copy()
+        sizes = 90 + scenario_matrix["exposure"].to_numpy(dtype=float) * 560
+        ax.scatter(
+            scenario_matrix["hazard"],
+            scenario_matrix["vulnerability"],
+            s=sizes,
+            c=scenario_matrix["risk_level"].map(colors),
+            edgecolor="#333333",
+            linewidth=0.8,
+            alpha=0.92,
+        )
+        for row in scenario_matrix.itertuples(index=False):
+            if row.risk_level in {"Critical", "High"}:
+                ax.annotate(
+                    row.name,
+                    (row.hazard, row.vulnerability),
+                    xytext=(5, 5),
+                    textcoords="offset points",
+                    fontsize=8.5,
+                    color="#222222",
+                )
+        ax.axvline(0.5, color="#999999", linewidth=0.9, linestyle="--", alpha=0.7)
+        ax.axhline(0.5, color="#999999", linewidth=0.9, linestyle="--", alpha=0.7)
+        ax.set_title(SCENARIO_LABELS[scenario], loc="left", fontsize=13, weight="bold")
+        ax.set_xlim(-0.04, 1.04)
+        ax.set_ylim(-0.04, 1.04)
+        ax.grid(True, color="#e0e0e0", linewidth=0.8, alpha=0.8)
+        ax.spines[["top", "right"]].set_visible(False)
+
+    axes[0].set_ylabel("Vulnerability score (0-1)")
+    for ax in axes:
+        ax.set_xlabel(f"Hazard score: hours with T2 > {HEAT_THRESHOLD_C:.0f} C (0-1)")
+
+    level_handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="none",
+            markerfacecolor=colors[level],
+            markeredgecolor="#333333",
+            markersize=9,
+            label=level,
+        )
+        for level in ["Critical", "High", "Moderate", "Low"]
+    ]
+    size_handles = [
+        Line2D(
+            [0],
+            [0],
+            marker="o",
+            color="none",
+            markerfacecolor="#ffffff",
+            markeredgecolor="#333333",
+            markersize=size,
+            label=label,
+        )
+        for size, label in [(6, "lower exposure"), (12, "higher exposure")]
+    ]
+    fig.suptitle(
+        "Socio-economic heat-risk matrix",
+        x=0.06,
+        ha="left",
+        fontsize=16,
+        weight="bold",
+    )
+    fig.legend(
+        handles=[*level_handles, *size_handles],
+        loc="upper center",
+        bbox_to_anchor=(0.56, 0.96),
+        ncols=6,
+        frameon=False,
+    )
+    fig.subplots_adjust(top=0.82, left=0.08, right=0.98, bottom=0.12, wspace=0.15)
+
+    png = DOCS / "heat_risk_matrix.png"
+    svg = DOCS / "heat_risk_matrix.svg"
+    fig.savefig(png, dpi=220, bbox_inches="tight")
+    fig.savefig(svg, bbox_inches="tight")
+    plt.close(fig)
+    return png
 
 
 def plot_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
@@ -407,6 +596,13 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
                 linestyle="--",
             )
         ax.axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
+        ax2.axhline(
+            HEAT_THRESHOLD_C,
+            color="#7f0000",
+            linewidth=1.8,
+            linestyle=":",
+            alpha=0.9,
+        )
         ax.text(
             0.02,
             0.96,
@@ -439,6 +635,14 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
             )
             for scenario in ["present", "future_plus_2p5c"]
         ],
+        Line2D(
+            [0],
+            [0],
+            color="#7f0000",
+            linewidth=1.8,
+            linestyle=":",
+            label=f"{HEAT_THRESHOLD_C:.0f} C hazard threshold",
+        ),
     ]
     fig.suptitle(
         f"Spring-only diurnal response: {zone_name} (gridiv {grid})",
@@ -447,8 +651,8 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         fontsize=16,
         weight="bold",
     )
-    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.55, 0.89), ncols=6, frameon=False)
-    fig.subplots_adjust(top=0.78, left=0.09, right=0.88, bottom=0.12)
+    fig.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.55, 0.90), ncols=4, frameon=False)
+    fig.subplots_adjust(top=0.76, left=0.09, right=0.88, bottom=0.12)
 
     png = DOCS / "seasonal_diurnal_high_risk_zone.png"
     svg = DOCS / "seasonal_diurnal_high_risk_zone.svg"
@@ -573,6 +777,7 @@ def main() -> int:
 
     risk = risk_table(hourly, neighbourhoods)
     risk.to_csv(DOCS / "risk_zone_summary.csv", index=False)
+    matrix = heat_risk_matrix(hourly, neighbourhoods)
     neighbourhoods.to_csv(DOCS / "landcover_zone_summary.csv", index=False)
     pd.DataFrame(
         [
@@ -583,6 +788,7 @@ def main() -> int:
 
     diurnal_png = plot_diurnal(hourly, risk)
     seasonal_png = plot_seasonal_diurnal(hourly, risk)
+    risk_matrix_png = plot_heat_risk_matrix(matrix)
     balance_png = plot_energy_balance(hourly, neighbourhoods, zones)
 
     high_risk = risk.sort_values("risk_rank").iloc[0]
@@ -596,6 +802,7 @@ def main() -> int:
         "high_risk_name": str(high_risk["name"]),
         "diurnal_plot": diurnal_png.name,
         "seasonal_diurnal_plot": seasonal_png.name,
+        "risk_matrix_plot": risk_matrix_png.name,
         "energy_balance_plot": balance_png.name,
     }
     (DOCS / "analysis_summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
@@ -603,6 +810,7 @@ def main() -> int:
     print("High-risk zone:", f"gridiv {summary['high_risk_gridiv']}, {summary['high_risk_name']}")
     print("Wrote:", diurnal_png)
     print("Wrote:", seasonal_png)
+    print("Wrote:", risk_matrix_png)
     print("Wrote:", balance_png)
     print("Wrote extracted hourly data:", DOCS / "hourly_fluxes_t2_present_future.csv")
     return 0
