@@ -77,8 +77,10 @@ This confirms the UDA-city SUEWS configuration loads, the present forcing is
 valid, the simulation completes for all 10 neighbourhoods, and `T2`/`QH`
 diagnostics are finite.
 
-Note: the dataset checkout and `.venv` are local working material and were not
-staged in this commit.
+Follow-up: the first setup commit left the dataset checkout local, so it did not
+show up on GitHub. The UDA-city data files were then committed as regular files
+under `data/uda-city-hackathon/`, excluding local build artifacts such as
+`.git/`, `.venv/`, generated outputs, and `SuPy.log`.
 
 ## GitHub Pages
 
