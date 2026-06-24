@@ -173,26 +173,27 @@ def plot_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
     # Compute future-present changes point by point first, then summarise those
     # deltas by local hour. This preserves the paired scenario signal instead
     # of subtracting already-smoothed curves.
-    cols = ["QN", "QH", "QE", "QS", "T2"]
+    flux_cols = ["QN", "QH", "QE", "QS"]
     present = (
         subset[subset["scenario"].eq("present")]
-        .set_index("time")[["hour"] + cols]
+        .set_index("time")[["hour"] + flux_cols]
         .sort_index()
     )
     future = (
         subset[subset["scenario"].eq("future_plus_2p5c")]
-        .set_index("time")[cols]
+        .set_index("time")[flux_cols]
         .sort_index()
     )
     common_times = present.index.intersection(future.index)
-    delta = future.loc[common_times, cols] - present.loc[common_times, cols]
+    delta = future.loc[common_times, flux_cols] - present.loc[common_times, flux_cols]
     delta["hour"] = present.loc[common_times, "hour"]
     delta_out = delta.reset_index().rename(columns={"index": "time"})
     delta_out.insert(0, "name", zone_name)
     delta_out.insert(0, "gridiv", grid)
     delta_out.to_csv(DOCS / "hourly_deltas_high_risk_zone.csv", index=False)
-    diurnal = delta.groupby("hour")[cols].mean().reset_index()
+    diurnal = delta.groupby("hour")[flux_cols].mean().reset_index()
     diurnal.to_csv(DOCS / "diurnal_deltas_high_risk_zone.csv", index=False)
+    t2_diurnal = subset.groupby(["scenario", "hour"], as_index=False)["T2"].mean()
 
     flux_colors = {
         "QN": "#252525",
@@ -216,26 +217,38 @@ def plot_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
             color=flux_colors[col],
             linewidth=2.6,
         )
-    axes[1].plot(
-        diurnal["hour"],
-        diurnal["T2"],
-        label="Delta T2 air temperature",
-        color="#c51b7d",
-        linewidth=2.8,
-    )
+    t2_labels = {
+        "present": "Present T2",
+        "future_plus_2p5c": "+2.5 C scenario T2",
+    }
+    t2_colors = {
+        "present": "#225ea8",
+        "future_plus_2p5c": "#c51b7d",
+    }
+    for scenario in ["present", "future_plus_2p5c"]:
+        group = t2_diurnal[t2_diurnal["scenario"].eq(scenario)]
+        if group.empty:
+            continue
+        axes[1].plot(
+            group["hour"],
+            group["T2"],
+            label=t2_labels[scenario],
+            color=t2_colors[scenario],
+            linewidth=2.8,
+        )
 
     axes[0].set_title(
-        f"Future-minus-present diurnal response: {zone_name} (gridiv {grid})",
+        f"Future-minus-present flux response with absolute T2: {zone_name} (gridiv {grid})",
         loc="left",
         fontsize=14,
         weight="bold",
     )
     axes[0].set_ylabel("Flux change (W m$^{-2}$)")
-    axes[1].set_ylabel("T2 change (deg C)")
+    axes[1].set_ylabel("T2 air temperature (deg C)")
     axes[1].set_xlabel("Local hour")
     axes[1].set_xticks(range(0, 24, 2))
+    axes[0].axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
     for ax in axes:
-        ax.axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
         ax.grid(True, color="#d9d9d9", linewidth=0.8, alpha=0.8)
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].legend(frameon=False, ncols=2)
