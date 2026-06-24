@@ -1,0 +1,11 @@
+{
+  "spinup_days": 14,
+  "analysis_days": 30,
+  "heat_threshold_c": 35.0,
+  "most_built_core": 10,
+  "most_vegetated_suburban": 1,
+  "high_risk_gridiv": 4,
+  "high_risk_name": "Kampong Lama",
+  "diurnal_plot": "diurnal_high_risk_zone.png",
+  "energy_balance_plot": "energy_balance_landcover_zones.png"
+}
