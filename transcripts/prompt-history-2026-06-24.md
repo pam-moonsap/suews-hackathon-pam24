@@ -122,3 +122,25 @@ collaboration path; detailed setup notes remain in `setup-session-2026-06-24.md`
 ## Prompt 14
 
 > Save prompts history
+
+## Prompt 15
+
+> Check time dimension and period of data
+
+## Prompt 16
+
+> Ok. So, now we can analyze only for spring? If yes, edit the plot to show only
+> spring and add word 'spring' into the graph.
+
+## Prompt 17
+
+> Now, let's translate these climate outputs into the socio-economic heat risk
+> indicator based on the formula in bridge/heat-to-risk.md. Combine our SUEWS
+> hazard outputs with the population vulnerability data from the city dataset.
+> Identify which zones or districts face critical risk and summarize them into a
+> clear risk matrix table. Choose only appropriate outputs we have, and if
+> diurnal flux plots are useful for this case, replot it, and add to this part.
+
+## Prompt 18
+
+> Save and update prompts history file
