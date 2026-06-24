@@ -144,3 +144,64 @@ collaboration path; detailed setup notes remain in `setup-session-2026-06-24.md`
 ## Prompt 18
 
 > Save and update prompts history file
+
+## Prompt 19
+
+> Please synthesize all our findings into a single, comprehensive report and
+> write it directly into the docs/index.md (or docs/index.html) file for our
+> GitHub Pages site. Format it professionally. The report must contain:
+> 1. Executive Summary
+> 2. Urban Heat Hazard Analysis (incorporating our data tables and saved plots)
+> 3. Socio-Economic Risk Translation matrix table
+> 4. An 'Honest Bridging' section analyzing where the physics science of SUEWS
+> holds beautifully and where it breaks (e.g., human behavioral adaptation, air
+> conditioning feedback, health limits)
+> 5. The mandatory formal citations for Jarvi et al. (2011) and Ward et al.
+> (2016) at the bottom.
+
+## Prompt 20
+
+> Show the page
+
+## Prompt 21
+
+> In the report, the 1st and 2nd plots are the same, choose the second plot
+> (spring plot). Include Socio-Economic Risk Translation matrix table into the
+> report (+interpretation and synthesis).
+
+## Prompt 22
+
+> Show the page
+
+## Prompt 23
+
+> Include Socio-Economic Risk Translation matrix table into the report
+> (+interpretation and synthesis)-- filename: heat_risk_matrix.png
+
+## Prompt 24
+
+> Is it included in the page?
+
+## Prompt 25
+
+> Show the page
+
+## Prompt 26
+
+> Open it on web browser.
+
+## Prompt 27
+
+> You said "the saved hourly analysis output covers the spring period after
+> spin-up only: 2024-03-16 00:00 to 2024-04-15', that means it is only one
+> month. Does it make sense to be representative of spring? Can we use all data
+> (3 months) in a short time? If not, we have to highlight something, e.g. word
+> or phrase to state that it is only for this month.
+
+## Prompt 28
+
+> Show the page and the page url.
+> Then, we are ready to submit. Save and update prompt. Export our entire
+> seesion transcript from this session into a markdown file and save it inside
+> the transcripts/ folder. Once done, stage, commit, and push all files to our
+> remote repository so the judges can view our public GitHub Pages site.

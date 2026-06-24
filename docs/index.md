@@ -25,10 +25,11 @@ only; it does not add heat to the SUEWS energy balance.
   density is the lowest in the dataset. With min-max exposure scaling, their
   aggregate risk score falls to zero. This is a feature and a limitation of the
   chosen relative indicator.
-- **Seasonal scope:** The saved hourly analysis output covers the spring period
-  after spin-up only: `2024-03-16 00:00` to `2024-04-15 00:00`, giving 721
-  hourly values per scenario and neighbourhood. Winter, summer, and autumn are
-  not present in the current output.
+- **Seasonal scope:** The saved hourly analysis output is a **one-month spring
+  sample**, not a full spring-season estimate: `2024-03-16 00:00` to
+  `2024-04-15 00:00`, giving 721 hourly values per scenario and
+  neighbourhood. Winter, summer, autumn, and the rest of spring are not present
+  in the current output.
 - **Science interpretation:** The model is strongest for comparing land-cover
   and morphology effects on outdoor heat and energy partitioning. It does not
   represent behaviour, health outcomes, indoor exposure, adaptive action, or AC
@@ -47,7 +48,7 @@ socio-economic data. Meteorology is shared across districts.
 | Model city | UDA-city synthetic hot-humid city |
 | Scenarios | Present hot-humid; +2.5 C future pseudo-warming |
 | Spin-up discarded | 14 days |
-| Analysis period used here | 2024-03-16 to 2024-04-15 |
+| Analysis period used here | One-month spring sample: 2024-03-16 to 2024-04-15 |
 | Analysis hours per scenario/neighbourhood | 721 |
 | Hazard metric | Count of hourly mean `T2 > 35 C` after spin-up |
 | Risk bridge exposure | Daytime population density |
@@ -55,8 +56,10 @@ socio-economic data. Meteorology is shared across districts.
 
 The raw forcing files extend from day-of-year 62 to 153 in 2024, but this
 practice analysis used a compact run to stay within desktop memory limits. The
-seasonal coverage file confirms that only spring hours are present after
-spin-up.
+results should therefore be read as a **one-month spring sample / stress-test
+window**, not as a representative average for the whole spring season. The
+seasonal coverage file confirms that only this spring-month window is present
+after spin-up.
 
 ### Urban Form Contrast
 
@@ -106,16 +109,17 @@ are physically hot in the SUEWS output, but the densest and most deprived
 hotspot districts become most important after exposure and vulnerability are
 added.
 
-### High-Risk Spring Diurnal Context
+### High-Risk One-Month Spring Diurnal Context
 
-![Spring-only diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
+![One-month spring-sample diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
 
-For Kampong Lama, the spring diurnal plot keeps `T2` as absolute present and
-future scenario air temperature while showing heat-flux changes as
-point-by-point `future - present` differences. The dotted line is the same
-35 C hazard threshold used in the risk bridge. This plot is useful as context:
-it shows when the +2.5 C scenario crosses the dangerous-heat threshold and how
-the energy-balance terms adjust. It is not itself the risk indicator.
+For Kampong Lama, the one-month spring-sample diurnal plot keeps `T2` as
+absolute present and future scenario air temperature while showing heat-flux
+changes as point-by-point `future - present` differences. The dotted line is
+the same 35 C hazard threshold used in the risk bridge. This plot is useful as
+context: it shows when the +2.5 C scenario crosses the dangerous-heat threshold
+within this month and how the energy-balance terms adjust. It is not itself the
+risk indicator and should not be read as a full-season spring climatology.
 
 ## 3. Socio-Economic Risk Translation Matrix
 

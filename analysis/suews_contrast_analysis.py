@@ -553,7 +553,7 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
     fig, ax = plt.subplots(figsize=(11, 7))
     ax2 = ax.twinx()
     ax.set_title(
-        "Spring diurnal response",
+        "One-month spring-sample diurnal response",
         loc="left",
         fontsize=14,
         weight="bold",
@@ -607,7 +607,7 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
             0.02,
             0.96,
             (
-                "Spring only\n"
+                "Spring-month sample only\n"
                 f"{spring_coverage['first_time']} to {spring_coverage['last_time']}\n"
                 f"{spring_coverage['n_hours']} hourly values after spin-up"
             ),
@@ -645,7 +645,7 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         ),
     ]
     fig.suptitle(
-        f"Spring-only diurnal response: {zone_name} (gridiv {grid})",
+        f"One-month spring-sample diurnal response: {zone_name} (gridiv {grid})",
         x=0.02,
         ha="left",
         fontsize=16,
