@@ -169,42 +169,77 @@ def plot_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
     grid = int(high_risk["gridiv"])
     zone_name = str(high_risk["name"])
     subset = hourly[hourly["gridiv"].eq(grid) & hourly["after_spinup"]].copy()
-    diurnal = subset.groupby(["scenario", "hour"])[["QH", "T2"]].mean().reset_index()
 
-    colors = {"present": "#225ea8", "future_plus_2p5c": "#c51b7d"}
-    labels = {"present": "Present baseline", "future_plus_2p5c": "+2.5 C forcing"}
+    # Compute future-present changes point by point first, then summarise those
+    # deltas by local hour. This preserves the paired scenario signal instead
+    # of subtracting already-smoothed curves.
+    cols = ["QN", "QH", "QE", "QS", "T2"]
+    present = (
+        subset[subset["scenario"].eq("present")]
+        .set_index("time")[["hour"] + cols]
+        .sort_index()
+    )
+    future = (
+        subset[subset["scenario"].eq("future_plus_2p5c")]
+        .set_index("time")[cols]
+        .sort_index()
+    )
+    common_times = present.index.intersection(future.index)
+    delta = future.loc[common_times, cols] - present.loc[common_times, cols]
+    delta["hour"] = present.loc[common_times, "hour"]
+    delta_out = delta.reset_index().rename(columns={"index": "time"})
+    delta_out.insert(0, "name", zone_name)
+    delta_out.insert(0, "gridiv", grid)
+    delta_out.to_csv(DOCS / "hourly_deltas_high_risk_zone.csv", index=False)
+    diurnal = delta.groupby("hour")[cols].mean().reset_index()
+    diurnal.to_csv(DOCS / "diurnal_deltas_high_risk_zone.csv", index=False)
+
+    flux_colors = {
+        "QN": "#252525",
+        "QH": "#d73027",
+        "QE": "#1a9850",
+        "QS": "#fdae61",
+    }
+    flux_labels = {
+        "QN": "Delta QN net radiation",
+        "QH": "Delta QH sensible",
+        "QE": "Delta QE latent",
+        "QS": "Delta QS storage",
+    }
 
     fig, axes = plt.subplots(2, 1, figsize=(11, 7), sharex=True, constrained_layout=True)
-    for scenario, group in diurnal.groupby("scenario"):
+    for col in ["QN", "QS", "QE", "QH"]:
         axes[0].plot(
-            group["hour"],
-            group["QH"],
-            label=labels.get(scenario, scenario),
-            color=colors.get(scenario),
+            diurnal["hour"],
+            diurnal[col],
+            label=flux_labels[col],
+            color=flux_colors[col],
             linewidth=2.6,
         )
-        axes[1].plot(
-            group["hour"],
-            group["T2"],
-            label=labels.get(scenario, scenario),
-            color=colors.get(scenario),
-            linewidth=2.6,
-        )
+    axes[1].plot(
+        diurnal["hour"],
+        diurnal["T2"],
+        label="Delta T2 air temperature",
+        color="#c51b7d",
+        linewidth=2.8,
+    )
 
     axes[0].set_title(
-        f"High-risk zone diurnal response: {zone_name} (gridiv {grid})",
+        f"Future-minus-present diurnal response: {zone_name} (gridiv {grid})",
         loc="left",
         fontsize=14,
         weight="bold",
     )
-    axes[0].set_ylabel("QH sensible heat flux (W m$^{-2}$)")
-    axes[1].set_ylabel("T2 air temperature (deg C)")
+    axes[0].set_ylabel("Flux change (W m$^{-2}$)")
+    axes[1].set_ylabel("T2 change (deg C)")
     axes[1].set_xlabel("Local hour")
     axes[1].set_xticks(range(0, 24, 2))
     for ax in axes:
+        ax.axhline(0, color="#777777", linewidth=1.0, alpha=0.7)
         ax.grid(True, color="#d9d9d9", linewidth=0.8, alpha=0.8)
         ax.spines[["top", "right"]].set_visible(False)
     axes[0].legend(frameon=False, ncols=2)
+    axes[1].legend(frameon=False)
 
     png = DOCS / "diurnal_high_risk_zone.png"
     svg = DOCS / "diurnal_high_risk_zone.svg"

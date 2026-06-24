@@ -20,13 +20,15 @@ The future forcing raises air temperature by exactly 2.5 C while keeping the
 same hot-humid event structure. QF is off, so population affects risk exposure,
 not model heat input.
 
-## Diurnal Response In The High-Risk Zone
+## Diurnal Change In The High-Risk Zone
 
-![Diurnal QH and T2 response for high-risk zone](diurnal_high_risk_zone.png)
+![Diurnal future-minus-present flux and T2 changes for the high-risk zone](diurnal_high_risk_zone.png)
 
-Hourly means are shown after a 14-day spin-up. The high-risk zone is Kampong
-Lama. The +2.5 C forcing shifts T2 upward through the full day, while QH changes
-only slightly because the radiation and land-cover controls remain similar.
+For the high-risk zone, Kampong Lama, I first paired each present hourly value
+with the same future-scenario hour and calculated `future - present` for `QN`,
+`QH`, `QE`, `QS`, and `T2`. The plot then shows the diurnal mean of those
+point-by-point changes after the 14-day spin-up. This makes the small energy
+partition changes visible instead of hiding them behind near-overlapping curves.
 
 ## Surface Energy Balance Across Land-Cover Zones
 
@@ -41,6 +43,8 @@ marks the most built-up core.
 ## Data Products
 
 - [Hourly QH, QE, QN, QS, and T2 for present and +2.5 C runs](hourly_fluxes_t2_present_future.csv)
+- [Point-by-point high-risk-zone future-minus-present deltas](hourly_deltas_high_risk_zone.csv)
+- [Diurnal high-risk-zone future-minus-present deltas](diurnal_deltas_high_risk_zone.csv)
 - [Land-cover zone summary](landcover_zone_summary.csv)
 - [Meteorology summary](meteorology_summary.csv)
 - [Risk-zone ranking](risk_zone_summary.csv)
