@@ -1,111 +1,281 @@
-# UDA-city Heat Contrast Analysis
+# UDA-city Heat Hazard and Socio-Economic Risk Report
 
-This practice run uses the UDA-city hackathon dataset: a synthetic,
-lower-income, hot-humid, Colombo-like city with 10 neighbourhoods. I used the
-provided SUEWS/SuPy configuration (`uda-city.yml`) and compared the present
-hot-humid forcing against the supplied +2.5 C pseudo-warming scenario.
+This report summarises a SUEWS/SuPy analysis for **UDA-city**, a synthetic,
+lower-income, hot-humid, Colombo-like city with 10 neighbourhoods. The aim is to
+separate the physical heat hazard from the socio-economic risk bridge: SUEWS
+estimates the environmental heat signal, while the risk indicator adds exposure
+and vulnerability.
 
-## Contrast Zones
+The analysis compares the provided **present hot-humid forcing** with a
+humidity-preserving **+2.5 C future pseudo-warming**. Anthropogenic heat (`QF`)
+is off in this challenge setup, so population affects exposure and vulnerability
+only; it does not add heat to the SUEWS energy balance.
 
-- **Most built-up urban core:** Zheng He Towers (`gridiv 10`), building fraction
-  `0.44`, green-blue fraction `0.15`.
-- **Most vegetated suburban/refuge area:** Jade Gardens (`gridiv 1`), building
-  fraction `0.047`, green-blue fraction `0.26`.
-- **Highest risk in this run:** Kampong Lama (`gridiv 4`), using the reference
-  risk bridge: `risk = minmax((hazard * exposure * vulnerability)^(1/3))`.
+## 1. Executive Summary
 
-The meteorology is shared across neighbourhoods, so differences between zones
-come from morphology, land cover, and socio-economic exposure/vulnerability.
-The future forcing raises air temperature by exactly 2.5 C while keeping the
-same hot-humid event structure. QF is off, so population affects risk exposure,
-not model heat input.
+- **Highest socio-economic risk:** Kampong Lama (`gridiv 4`) is the highest-risk
+  district in both present and future scenarios because it combines substantial
+  dangerous-heat hours with maximum daytime exposure and very high vulnerability.
+- **Critical present-day risk:** Kampong Lama, Dhobi Lines, and Fuzhou Lanes are
+  already critical-risk hotspot districts under the reference bridge.
+- **Critical future risk:** Under +2.5 C pseudo-warming, Mlima Moto also becomes
+  critical risk, giving four critical hotspot districts.
+- **Hottest does not mean highest risk:** Jade Gardens, Taman Melati, and
+  Serendib Rise have many dangerous heat hours, but their daytime population
+  density is the lowest in the dataset. With min-max exposure scaling, their
+  aggregate risk score falls to zero. This is a feature and a limitation of the
+  chosen relative indicator.
+- **Seasonal scope:** The saved hourly analysis output covers the spring period
+  after spin-up only: `2024-03-16 00:00` to `2024-04-15 00:00`, giving 721
+  hourly values per scenario and neighbourhood. Winter, summer, and autumn are
+  not present in the current output.
+- **Science interpretation:** The model is strongest for comparing land-cover
+  and morphology effects on outdoor heat and energy partitioning. It does not
+  represent behaviour, health outcomes, indoor exposure, adaptive action, or AC
+  feedback unless those processes are added explicitly.
 
-## Socio-Economic Heat Risk Matrix
+## 2. Urban Heat Hazard Analysis
 
-![Socio-economic heat-risk matrix](heat_risk_matrix.png)
+### Model Setup and Analysis Window
 
-I translated the SUEWS hazard output into the reference bridge from
-`bridge/heat-to-risk.md`: hazard is the count of post-spin-up hourly T2 values
-above 35 C, exposure is daytime population density, and vulnerability combines
-older people, young children, lack of AC, outdoor work, and deprivation. The
-three pillars are min-max scaled to [0, 1] and combined as
-`risk_index = minmax((hazard * exposure * vulnerability)^(1/3))`.
+The SUEWS configuration is `uda-city.yml`, applied to all 10 neighbourhoods.
+Neighbourhood differences come from land-cover fractions, building form, and
+socio-economic data. Meteorology is shared across districts.
 
-I classify risk as Critical for `risk_index >= 0.75`, High for `>= 0.50`,
-Moderate for `>= 0.25`, and Low below that. The critical districts are:
+| Item | Value |
+|---|---|
+| Model city | UDA-city synthetic hot-humid city |
+| Scenarios | Present hot-humid; +2.5 C future pseudo-warming |
+| Spin-up discarded | 14 days |
+| Analysis period used here | 2024-03-16 to 2024-04-15 |
+| Analysis hours per scenario/neighbourhood | 721 |
+| Hazard metric | Count of hourly mean `T2 > 35 C` after spin-up |
+| Risk bridge exposure | Daytime population density |
+| Risk bridge vulnerability | Over-65, under-5, lack of AC, outdoor work, deprivation |
 
-| Scenario | District | Type | Dangerous heat hours | Hazard | Exposure | Vulnerability | Risk index | Priority |
-|---|---|---|---:|---:|---:|---:|---:|---:|
-| Present | Kampong Lama | hotspot | 34 | 0.60 | 1.00 | 0.95 | 1.00 | 1 |
-| Present | Dhobi Lines | hotspot | 21 | 0.36 | 1.00 | 0.92 | 0.83 | 2 |
-| Present | Fuzhou Lanes | hotspot | 17 | 0.28 | 1.00 | 0.97 | 0.78 | 3 |
-| +2.5 C future | Kampong Lama | hotspot | 153 | 0.87 | 1.00 | 0.95 | 1.00 | 1 |
-| +2.5 C future | Fuzhou Lanes | hotspot | 133 | 0.69 | 1.00 | 0.97 | 0.93 | 2 |
-| +2.5 C future | Dhobi Lines | hotspot | 135 | 0.70 | 1.00 | 0.92 | 0.92 | 3 |
-| +2.5 C future | Mlima Moto | hotspot | 100 | 0.38 | 1.00 | 1.00 | 0.77 | 4 |
+The raw forcing files extend from day-of-year 62 to 153 in 2024, but this
+practice analysis used a compact run to stay within desktop memory limits. The
+seasonal coverage file confirms that only spring hours are present after
+spin-up.
 
-The hottest refuge neighbourhoods still matter physically, but the reference
-bridge gives them low aggregate risk because their daytime population density is
-the minimum in this 10-neighbourhood dataset, so min-max exposure becomes zero.
-That is a limitation of this relative indicator, not proof that no individual
-there is vulnerable.
+### Urban Form Contrast
 
-## Diurnal Flux Change And Air Temperature In The High-Risk Zone
+The model separates three broad neighbourhood types: lower-density refuges,
+dense hotspots, and urban cores. The two strongest land-cover contrasts are:
 
-![Diurnal future-minus-present flux changes and absolute T2 curves for the high-risk zone](diurnal_high_risk_zone.png)
+| Contrast | District | Type | Building fraction | Green-blue fraction | Impervious fraction | Day population density |
+|---|---|---|---:|---:|---:|---:|
+| Most vegetated/refuge | Jade Gardens | refuge | 0.047 | 0.26 | 0.64 | 80 |
+| Most built-up core | Zheng He Towers | core | 0.440 | 0.15 | 0.80 | 250 |
+| Highest risk district | Kampong Lama | hotspot | 0.140 | 0.07 | 0.85 | 300 |
 
-For the high-risk zone, Kampong Lama, I first paired each present hourly value
-with the same future-scenario hour and calculated `future - present` for the
-heat-flux terms `QN`, `QH`, `QE`, and `QS`. The upper panel shows the diurnal
-mean of those point-by-point flux changes after the 14-day spin-up, while the
-lower panel keeps T2 as absolute present and +2.5 C scenario air-temperature
-curves.
+This contrast matters because the SUEWS energy balance closes through
+`QN + QF = QS + QE + QH`. With `QF = 0`, the surface mix controls how net
+radiation (`QN`) is partitioned into storage heat (`QS`), latent heat (`QE`),
+and sensible heat (`QH`).
 
-## Spring Diurnal Check
+![Present-day surface energy balance by land-cover zone](energy_balance_landcover_zones.png)
+
+The energy-balance plot shows present-day daytime means sorted by building
+fraction. Built-up/core districts generally store more heat and have a smaller
+latent heat fraction than the most vegetated refuges. The most built-up core,
+Zheng He Towers, has the largest mean sensible heat flux in this summary
+(`QH = 155.8 W m-2`), but it is not the highest socio-economic risk district
+because its vulnerability is comparatively low.
+
+### Heat Hazard by District
+
+Dangerous heat hours are counted from hourly mean `T2 > 35 C` after spin-up.
+The +2.5 C scenario increases dangerous heat hours in every district.
+
+| District | Type | Present heat hours | Future heat hours | Present max T2 (C) | Future max T2 (C) |
+|---|---|---:|---:|---:|---:|
+| Jade Gardens | refuge | 55 | 167 | 39.96 | 42.51 |
+| Taman Melati | refuge | 41 | 158 | 39.59 | 42.13 |
+| Kampong Lama | hotspot | 34 | 153 | 37.98 | 40.52 |
+| Serendib Rise | refuge | 24 | 138 | 38.62 | 41.16 |
+| Dhobi Lines | hotspot | 21 | 135 | 37.48 | 40.02 |
+| Fuzhou Lanes | hotspot | 17 | 133 | 37.29 | 39.82 |
+| Mlima Moto | hotspot | 5 | 100 | 36.20 | 38.71 |
+| Lusitano Square | core | 5 | 96 | 36.25 | 38.77 |
+| Victoria Exchange | core | 5 | 89 | 36.02 | 38.53 |
+| Zheng He Towers | core | 2 | 59 | 35.12 | 37.63 |
+
+The table illustrates the main hazard-risk tension. The refuge neighbourhoods
+are physically hot in the SUEWS output, but the densest and most deprived
+hotspot districts become most important after exposure and vulnerability are
+added.
+
+### High-Risk Spring Diurnal Context
 
 ![Spring-only diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
 
-The saved hourly analysis only contains spring hours after spin-up, so this
-figure shows Spring only. Heat-flux terms are still calculated as point-by-point
-`future - present` changes, and T2 remains absolute present and +2.5 C scenario
-air temperature. The dotted 35 C line is the same threshold used to count
-dangerous heat hours in the risk matrix. The seasonal coverage file is kept as
-the audit trail showing that no winter, summer, or autumn hours are available in
-the current run.
+For Kampong Lama, the spring diurnal plot keeps `T2` as absolute present and
+future scenario air temperature while showing heat-flux changes as
+point-by-point `future - present` differences. The dotted line is the same
+35 C hazard threshold used in the risk bridge. This plot is useful as context:
+it shows when the +2.5 C scenario crosses the dangerous-heat threshold and how
+the energy-balance terms adjust. It is not itself the risk indicator.
 
-## Surface Energy Balance Across Land-Cover Zones
+![Future-minus-present flux changes and absolute T2 curves](diurnal_high_risk_zone.png)
 
-![Surface energy balance by land-cover zone](energy_balance_landcover_zones.png)
+The high-risk-zone diurnal response indicates small but systematic increases in
+net radiation and storage heat in the hotter scenario. The effect on `QH` is
+more muted because SUEWS solves `QH` as the residual after the other energy and
+water balance terms have been calculated.
 
-Bars show the present-day daytime mean partitioning of surface energy for all
-10 neighbourhoods, sorted from lowest to highest building fraction. QN is shown
-as black markers; QH, QE, and QS are stacked to show the partition of available
-energy. The green outline marks the most vegetated refuge, and the black outline
-marks the most built-up core.
+## 3. Socio-Economic Risk Translation Matrix
+
+The bridge follows the reference in `bridge/heat-to-risk.md`:
+
+```text
+risk_index = minmax((hazard * exposure * vulnerability)^(1/3))
+```
+
+where:
+
+- `hazard` is dangerous heat hours (`T2 > 35 C`) scaled to [0, 1],
+- `exposure` is daytime population density scaled to [0, 1],
+- `vulnerability` combines age, lack of AC, outdoor work, and deprivation, then
+  is scaled to [0, 1].
+
+For presentation, risk levels are classified as:
+
+| Risk level | Rule |
+|---|---|
+| Critical | `risk_index >= 0.75` |
+| High | `risk_index >= 0.50` |
+| Moderate | `risk_index >= 0.25` |
+| Low | `risk_index < 0.25` |
+
+![Socio-economic heat-risk matrix](heat_risk_matrix.png)
+
+The matrix plot places hazard on the x-axis and vulnerability on the y-axis.
+Bubble size represents exposure. Red bubbles are critical risk. This makes the
+translation visible: districts with high exposure and high vulnerability can
+become critical even when they are not the physically hottest districts.
+
+### Risk Matrix Table
+
+| District | Type | Present heat hours | Present risk | Present level | Future heat hours | Future risk | Future level |
+|---|---|---:|---:|---|---:|---:|---|
+| Kampong Lama | hotspot | 34 | 1.00 | Critical | 153 | 1.00 | Critical |
+| Dhobi Lines | hotspot | 21 | 0.83 | Critical | 135 | 0.92 | Critical |
+| Fuzhou Lanes | hotspot | 17 | 0.78 | Critical | 133 | 0.93 | Critical |
+| Mlima Moto | hotspot | 5 | 0.46 | Moderate | 100 | 0.77 | Critical |
+| Lusitano Square | core | 5 | 0.19 | Low | 96 | 0.31 | Moderate |
+| Victoria Exchange | core | 5 | 0.16 | Low | 89 | 0.24 | Low |
+| Jade Gardens | refuge | 55 | 0.00 | Low | 167 | 0.00 | Low |
+| Serendib Rise | refuge | 24 | 0.00 | Low | 138 | 0.00 | Low |
+| Taman Melati | refuge | 41 | 0.00 | Low | 158 | 0.00 | Low |
+| Zheng He Towers | core | 2 | 0.00 | Low | 59 | 0.00 | Low |
+
+### Critical Risk Districts
+
+| Scenario | Critical districts | Interpretation |
+|---|---|---|
+| Present | Kampong Lama; Dhobi Lines; Fuzhou Lanes | Critical risk is already concentrated in hotspot districts with high exposure and high vulnerability. |
+| +2.5 C future | Kampong Lama; Fuzhou Lanes; Dhobi Lines; Mlima Moto | The hotter scenario expands critical risk to all hotspot districts in the dataset. |
+
+The highest immediate priorities are therefore the hotspot districts, especially
+Kampong Lama. Mlima Moto is a clear future-warning district: its present hazard
+is low relative to the other hotspots, but its exposure and vulnerability are
+maximal, so it crosses into critical risk under pseudo-warming.
+
+## 4. Honest Bridging: Where the Science Holds and Where It Breaks
+
+### Where SUEWS Holds Beautifully
+
+SUEWS is well suited to the physical part of this task: translating
+neighbourhood form, surface cover, and meteorological forcing into outdoor heat
+and surface energy-balance terms. It gives an internally consistent account of
+how `QN`, `QS`, `QE`, and `QH` change under a hotter forcing scenario, and it
+lets us compare neighbourhoods under the same meteorology. That is exactly the
+kind of controlled contrast needed for this hackathon.
+
+The model also helps avoid a common mistake: treating "most built-up" and
+"highest risk" as the same thing. In this run, the most built-up core is Zheng
+He Towers, but the highest risk district is Kampong Lama. The physics output
+and the socio-economic bridge together show why: morphology shapes hazard, but
+people and vulnerability shape risk.
+
+### Where the Bridge Is Useful
+
+The risk bridge is useful because it keeps the three pillars visible:
+
+- **Hazard:** dangerous outdoor heat from SUEWS,
+- **Exposure:** how many people are in the affected district during the day,
+- **Vulnerability:** who is less able to avoid or cope with heat.
+
+The geometric mean is a conservative choice. If any pillar is near zero, the
+combined risk falls. This prevents a low-population district from automatically
+becoming the top priority just because it is physically hot.
+
+### Where the Bridge Breaks
+
+This bridge is not a health-impact model. It does not predict mortality,
+morbidity, hospital admissions, productivity loss, school disruption, or
+household-level harm. It is a structured screening index.
+
+Important missing processes include:
+
+- **Human behavioural adaptation:** people change routes, shift work hours, seek
+  shade, drink water, rest, or visit cooling spaces. The risk index cannot see
+  those responses.
+- **Indoor exposure:** SUEWS gives an outdoor environmental hazard. People spend
+  much of the day indoors, and indoor heat depends on building design,
+  ventilation, roof materials, occupancy, and appliance heat.
+- **Air-conditioning feedback:** lack of AC is used as a vulnerability proxy,
+  but AC use itself can add waste heat outdoors and change electricity demand.
+  In this run `QF` is off, so that feedback is not represented.
+- **Humidity and health limits:** the hazard metric uses dry-bulb `T2 > 35 C`.
+  UDA-city is hot-humid, so apparent temperature, wet-bulb temperature, or
+  humid-heat stress could be more policy-relevant than dry-bulb air temperature
+  alone.
+- **Relative scaling:** min-max scores are relative to these 10 neighbourhoods.
+  A risk score of zero does not mean "safe"; it means lowest relative score in
+  this dataset under this specific bridge.
+- **Aggregation:** neighbourhood averages hide individual exposure, age, health,
+  housing quality, occupation, and social support.
+- **Scenario framing:** the +2.5 C future is a pseudo-warming stress test, not a
+  downscaled climate projection.
+
+### Practical Reading
+
+The safest policy reading is:
+
+1. Use the SUEWS outputs to identify when and where outdoor heat hazard rises.
+2. Use the bridge to prioritise districts where heat overlaps with high
+   exposure and vulnerability.
+3. Treat the critical-risk districts as places for further investigation, not as
+   final proof of health outcomes.
+4. Extend the bridge with humid-heat metrics, indoor exposure, behavioural
+   adaptation, and AC/waste-heat feedback before using it for operational
+   health planning.
 
 ## Data Products
 
 - [Hourly QH, QE, QN, QS, and T2 for present and +2.5 C runs](hourly_fluxes_t2_present_future.csv)
 - [Socio-economic heat-risk matrix](heat_risk_matrix.csv)
 - [Critical heat-risk zones](critical_heat_risk_zones.csv)
-- [Point-by-point high-risk-zone future-minus-present heat-flux deltas](hourly_deltas_high_risk_zone.csv)
-- [Diurnal high-risk-zone future-minus-present heat-flux deltas](diurnal_deltas_high_risk_zone.csv)
+- [Risk-zone ranking](risk_zone_summary.csv)
+- [Land-cover zone summary](landcover_zone_summary.csv)
+- [Present-day energy-balance summary](energy_balance_landcover_zones.csv)
+- [Meteorology summary](meteorology_summary.csv)
 - [Spring point-by-point high-risk-zone heat-flux deltas](seasonal_hourly_deltas_high_risk_zone.csv)
 - [Spring diurnal high-risk-zone heat-flux deltas](seasonal_diurnal_flux_deltas_high_risk_zone.csv)
 - [Spring diurnal high-risk-zone T2 curves](seasonal_diurnal_t2_high_risk_zone.csv)
 - [Seasonal data coverage check](seasonal_data_coverage_high_risk_zone.csv)
-- [Land-cover zone summary](landcover_zone_summary.csv)
-- [Meteorology summary](meteorology_summary.csv)
-- [Risk-zone ranking](risk_zone_summary.csv)
-- [Energy-balance summary](energy_balance_landcover_zones.csv)
+- [Prompt history and AI collaboration evidence](https://github.com/pam-moonsap/suews-hackathon-pam24/blob/main/transcripts/prompt-history-2026-06-24.md)
 
-## Honest Limits
+## Formal Citations
 
-This is a compact practice run: all 10 neighbourhoods were simulated, but the
-window was limited to 14 spin-up days plus 30 analysis days to stay within the
-desktop memory limit. In the current output, the post-spin-up period is
-2024-03-16 to 2024-04-15, so the seasonal plot can only analyse spring. A true
-four-season comparison needs full-year or separate seasonal present/future
-forcing. SUEWS gives an environmental heat hazard, not a health outcome. The
-socio-economic layer is synthetic, so ranks are more meaningful than absolute
-values.
+Järvi, L., Grimmond, C. S. B., & Christen, A. (2011). The Surface Urban Energy
+and Water Balance Scheme (SUEWS): Evaluation in Los Angeles and Vancouver.
+*Journal of Hydrology*, 411(3-4), 219-237.
+https://doi.org/10.1016/j.jhydrol.2011.10.001
+
+Ward, H. C., Kotthaus, S., Järvi, L., & Grimmond, C. S. B. (2016). Surface Urban
+Energy and Water Balance Scheme (SUEWS): Development and evaluation at two UK
+sites. *Urban Climate*, 18, 1-32.
+https://doi.org/10.1016/j.uclim.2016.05.001
