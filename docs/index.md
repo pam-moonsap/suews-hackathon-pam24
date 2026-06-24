@@ -117,13 +117,6 @@ point-by-point `future - present` differences. The dotted line is the same
 it shows when the +2.5 C scenario crosses the dangerous-heat threshold and how
 the energy-balance terms adjust. It is not itself the risk indicator.
 
-![Future-minus-present flux changes and absolute T2 curves](diurnal_high_risk_zone.png)
-
-The high-risk-zone diurnal response indicates small but systematic increases in
-net radiation and storage heat in the hotter scenario. The effect on `QH` is
-more muted because SUEWS solves `QH` as the residual after the other energy and
-water balance terms have been calculated.
-
 ## 3. Socio-Economic Risk Translation Matrix
 
 The bridge follows the reference in `bridge/heat-to-risk.md`:
@@ -155,20 +148,30 @@ Bubble size represents exposure. Red bubbles are critical risk. This makes the
 translation visible: districts with high exposure and high vulnerability can
 become critical even when they are not the physically hottest districts.
 
-### Risk Matrix Table
+### Risk Translation Matrix Table
 
-| District | Type | Present heat hours | Present risk | Present level | Future heat hours | Future risk | Future level |
-|---|---|---:|---:|---|---:|---:|---|
-| Kampong Lama | hotspot | 34 | 1.00 | Critical | 153 | 1.00 | Critical |
-| Dhobi Lines | hotspot | 21 | 0.83 | Critical | 135 | 0.92 | Critical |
-| Fuzhou Lanes | hotspot | 17 | 0.78 | Critical | 133 | 0.93 | Critical |
-| Mlima Moto | hotspot | 5 | 0.46 | Moderate | 100 | 0.77 | Critical |
-| Lusitano Square | core | 5 | 0.19 | Low | 96 | 0.31 | Moderate |
-| Victoria Exchange | core | 5 | 0.16 | Low | 89 | 0.24 | Low |
-| Jade Gardens | refuge | 55 | 0.00 | Low | 167 | 0.00 | Low |
-| Serendib Rise | refuge | 24 | 0.00 | Low | 138 | 0.00 | Low |
-| Taman Melati | refuge | 41 | 0.00 | Low | 158 | 0.00 | Low |
-| Zheng He Towers | core | 2 | 0.00 | Low | 59 | 0.00 | Low |
+| Scenario | District | Type | Heat hours | Hazard | Exposure | Vulnerability | Risk index | Risk level |
+|---|---|---|---:|---:|---:|---:|---:|---|
+| Present | Kampong Lama | hotspot | 34 | 0.60 | 1.00 | 0.95 | 1.00 | Critical |
+| Present | Dhobi Lines | hotspot | 21 | 0.36 | 1.00 | 0.92 | 0.83 | Critical |
+| Present | Fuzhou Lanes | hotspot | 17 | 0.28 | 1.00 | 0.97 | 0.78 | Critical |
+| Present | Mlima Moto | hotspot | 5 | 0.06 | 1.00 | 1.00 | 0.46 | Moderate |
+| Present | Lusitano Square | core | 5 | 0.06 | 0.77 | 0.09 | 0.19 | Low |
+| Present | Victoria Exchange | core | 5 | 0.06 | 0.77 | 0.06 | 0.16 | Low |
+| Present | Jade Gardens | refuge | 55 | 1.00 | 0.00 | 0.32 | 0.00 | Low |
+| Present | Serendib Rise | refuge | 24 | 0.42 | 0.00 | 0.27 | 0.00 | Low |
+| Present | Taman Melati | refuge | 41 | 0.74 | 0.00 | 0.36 | 0.00 | Low |
+| Present | Zheng He Towers | core | 2 | 0.00 | 0.77 | 0.00 | 0.00 | Low |
+| +2.5 C future | Kampong Lama | hotspot | 153 | 0.87 | 1.00 | 0.95 | 1.00 | Critical |
+| +2.5 C future | Fuzhou Lanes | hotspot | 133 | 0.69 | 1.00 | 0.97 | 0.93 | Critical |
+| +2.5 C future | Dhobi Lines | hotspot | 135 | 0.70 | 1.00 | 0.92 | 0.92 | Critical |
+| +2.5 C future | Mlima Moto | hotspot | 100 | 0.38 | 1.00 | 1.00 | 0.77 | Critical |
+| +2.5 C future | Lusitano Square | core | 96 | 0.34 | 0.77 | 0.09 | 0.31 | Moderate |
+| +2.5 C future | Victoria Exchange | core | 89 | 0.28 | 0.77 | 0.06 | 0.24 | Low |
+| +2.5 C future | Jade Gardens | refuge | 167 | 1.00 | 0.00 | 0.32 | 0.00 | Low |
+| +2.5 C future | Serendib Rise | refuge | 138 | 0.73 | 0.00 | 0.27 | 0.00 | Low |
+| +2.5 C future | Taman Melati | refuge | 158 | 0.92 | 0.00 | 0.36 | 0.00 | Low |
+| +2.5 C future | Zheng He Towers | core | 59 | 0.00 | 0.77 | 0.00 | 0.00 | Low |
 
 ### Critical Risk Districts
 
@@ -181,6 +184,28 @@ The highest immediate priorities are therefore the hotspot districts, especially
 Kampong Lama. Mlima Moto is a clear future-warning district: its present hazard
 is low relative to the other hotspots, but its exposure and vulnerability are
 maximal, so it crosses into critical risk under pseudo-warming.
+
+### Interpretation and Synthesis
+
+The risk matrix changes the story from "where is the air hottest?" to "where do
+dangerous heat, people, and vulnerability coincide?" On pure hazard, the refuge
+neighbourhoods Jade Gardens and Taman Melati record the most dangerous heat
+hours. After the bridge adds exposure and vulnerability, they are not the top
+priority because their daytime population density is the dataset minimum. This
+does not mean they are safe; it means this relative, neighbourhood-average
+indicator is not designed to identify isolated vulnerable people in low-density
+areas.
+
+The most consistent risk signal is the hotspot group. Kampong Lama, Dhobi
+Lines, and Fuzhou Lanes are critical now and remain critical in the +2.5 C
+scenario. Mlima Moto is the strongest emerging concern: it has only five
+present-day dangerous heat hours, but its exposure and vulnerability are both at
+the maximum of the dataset, so future warming pushes it into critical risk.
+The core districts have substantial exposure but lower vulnerability, so their
+risk remains low to moderate in this bridge. The practical synthesis is that
+heat-response planning should prioritise the hotspot districts first, while
+using the high-hazard refuge results as a reminder to investigate local pockets
+of vulnerability that the aggregated index may hide.
 
 ## 4. Honest Bridging: Where the Science Holds and Where It Breaks
 
