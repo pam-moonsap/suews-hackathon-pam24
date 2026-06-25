@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UDA-city Heat Hazard and Socio-Economic Risk Report</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-soft: #eef5f4;
+      --ink: #172026;
+      --muted: #5d6972;
+      --line: #d8e0e5;
+      --teal: #087f83;
+      --blue: #2f5f9f;
+      --amber: #b97913;
+      --red: #b8323a;
+      --green: #2e7d55;
+      --shadow: 0 12px 28px rgba(23, 32, 38, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 17px;
+      line-height: 1.58;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    code {
+      padding: 0.12rem 0.32rem;
+      border-radius: 4px;
+      background: #eef2f5;
+      color: #13212b;
+      font-family: Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9em;
+    }
+
+    .page {
+      width: min(100% - 32px, 1680px);
+      margin: 0 auto;
+      padding: 18px 0 36px;
+    }
+
+    .dashboard-header {
+      min-height: calc(100vh - 36px);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 16px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand strong {
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .brand span {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .nav a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 11px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--ink);
+      font-size: 0.88rem;
+      text-decoration: none;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(360px, 0.8fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .hero-main,
+    .hero-side,
+    .panel,
+    .metric-card,
+    .figure-card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-main {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--teal);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      letter-spacing: 0;
+      line-height: 1.14;
+    }
+
+    h1 {
+      max-width: 980px;
+      margin: 0;
+      font-size: 3rem;
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.8rem;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 1.18rem;
+    }
+
+    .lead {
+      max-width: 1040px;
+      margin: 18px 0 0;
+      color: #33414a;
+      font-size: 1.08rem;
+    }
+
+    .status-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef5f4;
+      color: #16484b;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .pill.warn {
+      background: #fff4dc;
+      color: #774d0d;
+    }
+
+    .pill.risk {
+      background: #ffe7e9;
+      color: #8a2027;
+    }
+
+    .hero-side {
+      display: grid;
+      gap: 10px;
+      padding: 18px;
+      align-content: center;
+    }
+
+    .metric-card {
+      box-shadow: none;
+      padding: 15px;
+    }
+
+    .metric-card span {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 1.45rem;
+      line-height: 1.15;
+    }
+
+    .metric-card p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .hero-footer {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-card {
+      min-width: 0;
+      min-height: 86px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 1.55rem;
+      line-height: 1;
+    }
+
+    .mini-card span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .section {
+      margin-top: 20px;
+      scroll-margin-top: 16px;
+    }
+
+    .panel {
+      padding: 22px;
+      box-shadow: none;
+    }
+
+    .panel + .panel,
+    .grid + .panel,
+    .panel + .grid {
+      margin-top: 14px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .figure-card {
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .figure-card img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+    }
+
+    .figure-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    ul,
+    ol {
+      margin: 0;
+      padding-left: 1.35rem;
+    }
+
+    li + li {
+      margin-top: 0.45rem;
+    }
+
+    p {
+      margin: 0 0 1rem;
+    }
+
+    .table-wrap {
+      min-width: 0;
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 680px;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      padding: 0.62rem 0.72rem;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f0f4f7;
+      color: #25333c;
+      font-weight: 700;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .num {
+      text-align: right;
+    }
+
+    .risk-critical {
+      color: var(--red);
+      font-weight: 700;
+    }
+
+    .risk-moderate {
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    .risk-low {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .formula {
+      margin: 12px 0 18px;
+      padding: 14px 16px;
+      border-left: 4px solid var(--teal);
+      border-radius: 6px;
+      background: #eef5f4;
+      font-family: Consolas, "Liberation Mono", Menlo, monospace;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .data-links {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .data-links a {
+      display: block;
+      min-height: 48px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #ffffff;
+      text-decoration: none;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .citation {
+      padding-left: 1rem;
+      border-left: 4px solid var(--line);
+      color: #2d3941;
+    }
+
+    @media (max-width: 1180px) {
+      body {
+        font-size: 16px;
+      }
+
+      .hero,
+      .grid,
+      .grid.three {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-footer,
+      .data-links {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .dashboard-header {
+        min-height: auto;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 16px, 1680px);
+        padding-top: 8px;
+      }
+
+      .topbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .hero-main,
+      .hero-side,
+      .panel,
+      .figure-card {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 2.05rem;
+      }
+
+      h2 {
+        font-size: 1.45rem;
+      }
+
+      h3 {
+        font-size: 1.08rem;
+      }
+
+      .hero-footer,
+      .data-links {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="dashboard-header">
+      <div class="topbar">
+        <div class="brand">
+          <strong>suews-hackathon-pam24</strong>
+          <span>UDA-city heat hazard and socio-economic risk report</span>
+        </div>
+        <nav class="nav" aria-label="Report sections">
+          <a href="#summary">Summary</a>
+          <a href="#hazard">Hazard</a>
+          <a href="#risk">Risk</a>
+          <a href="#bridge">Honest Bridging</a>
+          <a href="#data">Data</a>
+        </nav>
+      </div>
+
+      <div class="hero">
+        <section class="hero-main" aria-labelledby="report-title">
+          <p class="eyebrow">SUEWS / SuPy Urban Climate Dashboard</p>
+          <h1 id="report-title">UDA-city Heat Hazard and Socio-Economic Risk Report</h1>
+          <p class="lead">This report summarises a SUEWS/SuPy analysis for <strong>UDA-city</strong>, a synthetic, lower-income, hot-humid, Colombo-like city with 10 neighbourhoods. The aim is to separate the physical heat hazard from the socio-economic risk bridge: SUEWS estimates the environmental heat signal, while the risk indicator adds exposure and vulnerability.</p>
+          <p class="lead">The analysis compares the provided <strong>present hot-humid forcing</strong> with a humidity-preserving <strong>+2.5 C future pseudo-warming</strong>. Anthropogenic heat (<code>QF</code>) is off in this challenge setup, so population affects exposure and vulnerability only; it does not add heat to the SUEWS energy balance.</p>
+          <div class="status-row">
+            <span class="pill risk">Highest risk: Kampong Lama</span>
+            <span class="pill">10 neighbourhoods</span>
+            <span class="pill warn">One-month summer sample</span>
+            <span class="pill">QF off</span>
+          </div>
+        </section>
+
+        <aside class="hero-side" aria-label="Key findings">
+          <div class="metric-card">
+            <span>Highest socio-economic risk</span>
+            <strong>Kampong Lama</strong>
+            <p><code>gridiv 4</code> is the highest-risk district in both present and future scenarios.</p>
+          </div>
+          <div class="metric-card">
+            <span>Present critical districts</span>
+            <strong>3</strong>
+            <p>Kampong Lama, Dhobi Lines, and Fuzhou Lanes.</p>
+          </div>
+          <div class="metric-card">
+            <span>Future critical districts</span>
+            <strong>4</strong>
+            <p>Mlima Moto joins the critical-risk hotspot group under +2.5 C pseudo-warming.</p>
+          </div>
+        </aside>
+      </div>
+
+      <div class="hero-footer" aria-label="Analysis scope">
+        <div class="mini-card"><strong>721</strong><span>analysis hours per scenario/neighbourhood</span></div>
+        <div class="mini-card"><strong>14</strong><span>spin-up days discarded</span></div>
+        <div class="mini-card"><strong>35 C</strong><span>dangerous heat threshold for hourly T2</span></div>
+        <div class="mini-card"><strong>+2.5 C</strong><span>future pseudo-warming scenario</span></div>
+        <div class="mini-card"><strong>0</strong><span>anthropogenic heat input in this challenge run</span></div>
+      </div>
+    </header>
+
+    <section id="summary" class="section panel">
+      <h2>1. Executive Summary</h2>
+      <ul>
+        <li><strong>Highest socio-economic risk:</strong> Kampong Lama (<code>gridiv 4</code>) is the highest-risk district in both present and future scenarios because it combines substantial dangerous-heat hours with maximum daytime exposure and very high vulnerability.</li>
+        <li><strong>Critical present-day risk:</strong> Kampong Lama, Dhobi Lines, and Fuzhou Lanes are already critical-risk hotspot districts under the reference bridge.</li>
+        <li><strong>Critical future risk:</strong> Under +2.5 C pseudo-warming, Mlima Moto also becomes critical risk, giving four critical hotspot districts.</li>
+        <li><strong>Hottest does not mean highest risk:</strong> Jade Gardens, Taman Melati, and Serendib Rise have many dangerous heat hours, but their daytime population density is the lowest in the dataset. With min-max exposure scaling, their aggregate risk score falls to zero. This is a feature and a limitation of the chosen relative indicator.</li>
+        <li><strong>Seasonal scope:</strong> The saved hourly analysis output is a <strong>one-month summer sample</strong>, not a full summer-season estimate: <code>2024-03-16 00:00</code> to <code>2024-04-15 00:00</code>, giving 721 hourly values per scenario and neighbourhood. Other months/seasons and the rest of summer are not present in the current output.</li>
+        <li><strong>Science interpretation:</strong> The model is strongest for comparing land-cover and morphology effects on outdoor heat and energy partitioning. It does not represent behaviour, health outcomes, indoor exposure, adaptive action, or AC feedback unless those processes are added explicitly.</li>
+      </ul>
+    </section>
+
+    <section id="hazard" class="section">
+      <div class="panel">
+        <h2>2. Urban Heat Hazard Analysis</h2>
+        <h3>Model Setup and Analysis Window</h3>
+        <p>The SUEWS configuration is <code>uda-city.yml</code>, applied to all 10 neighbourhoods. Neighbourhood differences come from land-cover fractions, building form, and socio-economic data. Meteorology is shared across districts.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Item</th><th>Value</th></tr></thead>
+            <tbody>
+              <tr><td>Model city</td><td>UDA-city synthetic hot-humid city</td></tr>
+              <tr><td>Scenarios</td><td>Present hot-humid; +2.5 C future pseudo-warming</td></tr>
+              <tr><td>Spin-up discarded</td><td>14 days</td></tr>
+              <tr><td>Analysis period used here</td><td>One-month summer sample: 2024-03-16 to 2024-04-15</td></tr>
+              <tr><td>Analysis hours per scenario/neighbourhood</td><td>721</td></tr>
+              <tr><td>Hazard metric</td><td>Count of hourly mean <code>T2 &gt; 35 C</code> after spin-up</td></tr>
+              <tr><td>Risk bridge exposure</td><td>Daytime population density</td></tr>
+              <tr><td>Risk bridge vulnerability</td><td>Over-65, under-5, lack of AC, outdoor work, deprivation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="note">The raw forcing files extend from day-of-year 62 to 153 in 2024, but this practice analysis used a compact run to stay within desktop memory limits. The results should therefore be read as a <strong>one-month summer sample / stress-test window</strong>, not as a representative average for the whole summer season. The seasonal coverage file confirms that only this summer-labeled one-month window is present after spin-up.</p>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Urban Form Contrast</h3>
+          <p>The model separates three broad neighbourhood types: lower-density refuges, dense hotspots, and urban cores. The two strongest land-cover contrasts are:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Contrast</th><th>District</th><th>Type</th><th class="num">Building fraction</th><th class="num">Green-blue fraction</th><th class="num">Impervious fraction</th><th class="num">Day population density</th></tr></thead>
+              <tbody>
+                <tr><td>Most vegetated/refuge</td><td>Jade Gardens</td><td>refuge</td><td class="num">0.047</td><td class="num">0.26</td><td class="num">0.64</td><td class="num">80</td></tr>
+                <tr><td>Most built-up core</td><td>Zheng He Towers</td><td>core</td><td class="num">0.440</td><td class="num">0.15</td><td class="num">0.80</td><td class="num">250</td></tr>
+                <tr><td>Highest risk district</td><td>Kampong Lama</td><td>hotspot</td><td class="num">0.140</td><td class="num">0.07</td><td class="num">0.85</td><td class="num">300</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>This contrast matters because the SUEWS energy balance closes through <code>QN + QF = QS + QE + QH</code>. With <code>QF = 0</code>, the surface mix controls how net radiation (<code>QN</code>) is partitioned into storage heat (<code>QS</code>), latent heat (<code>QE</code>), and sensible heat (<code>QH</code>).</p>
+        </div>
+
+        <div class="figure-card">
+          <h3>Surface Energy Balance</h3>
+          <img src="energy_balance_landcover_zones.png" alt="Present-day surface energy balance by land-cover zone">
+          <p>The energy-balance plot shows present-day daytime means sorted by building fraction. Built-up/core districts generally store more heat and have a smaller latent heat fraction than the most vegetated refuges. The most built-up core, Zheng He Towers, has the largest mean sensible heat flux in this summary (<code>QH = 155.8 W m-2</code>), but it is not the highest socio-economic risk district because its vulnerability is comparatively low.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Heat Hazard by District</h3>
+        <p>Dangerous heat hours are counted from hourly mean <code>T2 &gt; 35 C</code> after spin-up. The +2.5 C scenario increases dangerous heat hours in every district.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>District</th><th>Type</th><th class="num">Present heat hours</th><th class="num">Future heat hours</th><th class="num">Present max T2 (C)</th><th class="num">Future max T2 (C)</th></tr></thead>
+            <tbody>
+              <tr><td>Jade Gardens</td><td>refuge</td><td class="num">55</td><td class="num">167</td><td class="num">39.96</td><td class="num">42.51</td></tr>
+              <tr><td>Taman Melati</td><td>refuge</td><td class="num">41</td><td class="num">158</td><td class="num">39.59</td><td class="num">42.13</td></tr>
+              <tr><td>Kampong Lama</td><td>hotspot</td><td class="num">34</td><td class="num">153</td><td class="num">37.98</td><td class="num">40.52</td></tr>
+              <tr><td>Serendib Rise</td><td>refuge</td><td class="num">24</td><td class="num">138</td><td class="num">38.62</td><td class="num">41.16</td></tr>
+              <tr><td>Dhobi Lines</td><td>hotspot</td><td class="num">21</td><td class="num">135</td><td class="num">37.48</td><td class="num">40.02</td></tr>
+              <tr><td>Fuzhou Lanes</td><td>hotspot</td><td class="num">17</td><td class="num">133</td><td class="num">37.29</td><td class="num">39.82</td></tr>
+              <tr><td>Mlima Moto</td><td>hotspot</td><td class="num">5</td><td class="num">100</td><td class="num">36.20</td><td class="num">38.71</td></tr>
+              <tr><td>Lusitano Square</td><td>core</td><td class="num">5</td><td class="num">96</td><td class="num">36.25</td><td class="num">38.77</td></tr>
+              <tr><td>Victoria Exchange</td><td>core</td><td class="num">5</td><td class="num">89</td><td class="num">36.02</td><td class="num">38.53</td></tr>
+              <tr><td>Zheng He Towers</td><td>core</td><td class="num">2</td><td class="num">59</td><td class="num">35.12</td><td class="num">37.63</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The table illustrates the main hazard-risk tension. The refuge neighbourhoods are physically hot in the SUEWS output, but the densest and most deprived hotspot districts become most important after exposure and vulnerability are added.</p>
+      </div>
+
+      <div class="figure-card">
+        <h3>High-Risk One-Month Summer Diurnal Context</h3>
+        <img src="seasonal_diurnal_high_risk_zone_summer.png" alt="One-month summer-sample diurnal response for the high-risk zone">
+        <p>For Kampong Lama, the one-month summer-sample diurnal plot keeps <code>T2</code> as absolute present and future scenario air temperature while showing heat-flux changes as point-by-point <code>future - present</code> differences. The dotted line is the same 35 C hazard threshold used in the risk bridge. This plot is useful as context: it shows when the +2.5 C scenario crosses the dangerous-heat threshold within this month and how the energy-balance terms adjust. It is not itself the risk indicator and should not be read as a full-season summer climatology.</p>
+      </div>
+    </section>
+
+    <section id="risk" class="section">
+      <div class="panel">
+        <h2>3. Socio-Economic Risk Translation Matrix</h2>
+        <p>The bridge follows the reference in <code>bridge/heat-to-risk.md</code>:</p>
+        <div class="formula">risk_index = minmax((hazard * exposure * vulnerability)^(1/3))</div>
+        <p>where:</p>
+        <ul>
+          <li><code>hazard</code> is dangerous heat hours (<code>T2 &gt; 35 C</code>) scaled to [0, 1],</li>
+          <li><code>exposure</code> is daytime population density scaled to [0, 1],</li>
+          <li><code>vulnerability</code> combines age, lack of AC, outdoor work, and deprivation, then is scaled to [0, 1].</li>
+        </ul>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Risk Level Rules</h3>
+          <p>For presentation, risk levels are classified as:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Risk level</th><th>Rule</th></tr></thead>
+              <tbody>
+                <tr><td class="risk-critical">Critical</td><td><code>risk_index &gt;= 0.75</code></td></tr>
+                <tr><td>High</td><td><code>risk_index &gt;= 0.50</code></td></tr>
+                <tr><td class="risk-moderate">Moderate</td><td><code>risk_index &gt;= 0.25</code></td></tr>
+                <tr><td class="risk-low">Low</td><td><code>risk_index &lt; 0.25</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="figure-card">
+          <h3>Risk Matrix Plot</h3>
+          <img src="heat_risk_matrix.png" alt="Socio-economic heat-risk matrix">
+          <p>The matrix plot places hazard on the x-axis and vulnerability on the y-axis. Bubble size represents exposure. Red bubbles are critical risk. This makes the translation visible: districts with high exposure and high vulnerability can become critical even when they are not the physically hottest districts.</p>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Risk Translation Matrix Table</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Scenario</th><th>District</th><th>Type</th><th class="num">Heat hours</th><th class="num">Hazard</th><th class="num">Exposure</th><th class="num">Vulnerability</th><th class="num">Risk index</th><th>Risk level</th></tr></thead>
+            <tbody>
+              <tr><td>Present</td><td>Kampong Lama</td><td>hotspot</td><td class="num">34</td><td class="num">0.60</td><td class="num">1.00</td><td class="num">0.95</td><td class="num">1.00</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>Present</td><td>Dhobi Lines</td><td>hotspot</td><td class="num">21</td><td class="num">0.36</td><td class="num">1.00</td><td class="num">0.92</td><td class="num">0.83</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>Present</td><td>Fuzhou Lanes</td><td>hotspot</td><td class="num">17</td><td class="num">0.28</td><td class="num">1.00</td><td class="num">0.97</td><td class="num">0.78</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>Present</td><td>Mlima Moto</td><td>hotspot</td><td class="num">5</td><td class="num">0.06</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.46</td><td class="risk-moderate">Moderate</td></tr>
+              <tr><td>Present</td><td>Lusitano Square</td><td>core</td><td class="num">5</td><td class="num">0.06</td><td class="num">0.77</td><td class="num">0.09</td><td class="num">0.19</td><td class="risk-low">Low</td></tr>
+              <tr><td>Present</td><td>Victoria Exchange</td><td>core</td><td class="num">5</td><td class="num">0.06</td><td class="num">0.77</td><td class="num">0.06</td><td class="num">0.16</td><td class="risk-low">Low</td></tr>
+              <tr><td>Present</td><td>Jade Gardens</td><td>refuge</td><td class="num">55</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">0.32</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>Present</td><td>Serendib Rise</td><td>refuge</td><td class="num">24</td><td class="num">0.42</td><td class="num">0.00</td><td class="num">0.27</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>Present</td><td>Taman Melati</td><td>refuge</td><td class="num">41</td><td class="num">0.74</td><td class="num">0.00</td><td class="num">0.36</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>Present</td><td>Zheng He Towers</td><td>core</td><td class="num">2</td><td class="num">0.00</td><td class="num">0.77</td><td class="num">0.00</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>+2.5 C future</td><td>Kampong Lama</td><td>hotspot</td><td class="num">153</td><td class="num">0.87</td><td class="num">1.00</td><td class="num">0.95</td><td class="num">1.00</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>+2.5 C future</td><td>Fuzhou Lanes</td><td>hotspot</td><td class="num">133</td><td class="num">0.69</td><td class="num">1.00</td><td class="num">0.97</td><td class="num">0.93</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>+2.5 C future</td><td>Dhobi Lines</td><td>hotspot</td><td class="num">135</td><td class="num">0.70</td><td class="num">1.00</td><td class="num">0.92</td><td class="num">0.92</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>+2.5 C future</td><td>Mlima Moto</td><td>hotspot</td><td class="num">100</td><td class="num">0.38</td><td class="num">1.00</td><td class="num">1.00</td><td class="num">0.77</td><td class="risk-critical">Critical</td></tr>
+              <tr><td>+2.5 C future</td><td>Lusitano Square</td><td>core</td><td class="num">96</td><td class="num">0.34</td><td class="num">0.77</td><td class="num">0.09</td><td class="num">0.31</td><td class="risk-moderate">Moderate</td></tr>
+              <tr><td>+2.5 C future</td><td>Victoria Exchange</td><td>core</td><td class="num">89</td><td class="num">0.28</td><td class="num">0.77</td><td class="num">0.06</td><td class="num">0.24</td><td class="risk-low">Low</td></tr>
+              <tr><td>+2.5 C future</td><td>Jade Gardens</td><td>refuge</td><td class="num">167</td><td class="num">1.00</td><td class="num">0.00</td><td class="num">0.32</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>+2.5 C future</td><td>Serendib Rise</td><td>refuge</td><td class="num">138</td><td class="num">0.73</td><td class="num">0.00</td><td class="num">0.27</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>+2.5 C future</td><td>Taman Melati</td><td>refuge</td><td class="num">158</td><td class="num">0.92</td><td class="num">0.00</td><td class="num">0.36</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+              <tr><td>+2.5 C future</td><td>Zheng He Towers</td><td>core</td><td class="num">59</td><td class="num">0.00</td><td class="num">0.77</td><td class="num">0.00</td><td class="num">0.00</td><td class="risk-low">Low</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Critical Risk Districts</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Scenario</th><th>Critical districts</th><th>Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>Present</td><td>Kampong Lama; Dhobi Lines; Fuzhou Lanes</td><td>Critical risk is already concentrated in hotspot districts with high exposure and high vulnerability.</td></tr>
+                <tr><td>+2.5 C future</td><td>Kampong Lama; Fuzhou Lanes; Dhobi Lines; Mlima Moto</td><td>The hotter scenario expands critical risk to all hotspot districts in the dataset.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The highest immediate priorities are therefore the hotspot districts, especially Kampong Lama. Mlima Moto is a clear future-warning district: its present hazard is low relative to the other hotspots, but its exposure and vulnerability are maximal, so it crosses into critical risk under pseudo-warming.</p>
+        </div>
+        <div class="panel">
+          <h3>Interpretation and Synthesis</h3>
+          <p>The risk matrix changes the story from "where is the air hottest?" to "where do dangerous heat, people, and vulnerability coincide?" On pure hazard, the refuge neighbourhoods Jade Gardens and Taman Melati record the most dangerous heat hours. After the bridge adds exposure and vulnerability, they are not the top priority because their daytime population density is the dataset minimum. This does not mean they are safe; it means this relative, neighbourhood-average indicator is not designed to identify isolated vulnerable people in low-density areas.</p>
+          <p>The most consistent risk signal is the hotspot group. Kampong Lama, Dhobi Lines, and Fuzhou Lanes are critical now and remain critical in the +2.5 C scenario. Mlima Moto is the strongest emerging concern: it has only five present-day dangerous heat hours, but its exposure and vulnerability are both at the maximum of the dataset, so future warming pushes it into critical risk. The core districts have substantial exposure but lower vulnerability, so their risk remains low to moderate in this bridge. The practical synthesis is that heat-response planning should prioritise the hotspot districts first, while using the high-hazard refuge results as a reminder to investigate local pockets of vulnerability that the aggregated index may hide.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="bridge" class="section">
+      <div class="panel">
+        <h2>4. Honest Bridging: Where the Science Holds and Where It Breaks</h2>
+      </div>
+      <div class="grid three">
+        <div class="panel">
+          <h3>Where SUEWS Holds Beautifully</h3>
+          <p>SUEWS is well suited to the physical part of this task: translating neighbourhood form, surface cover, and meteorological forcing into outdoor heat and surface energy-balance terms. It gives an internally consistent account of how <code>QN</code>, <code>QS</code>, <code>QE</code>, and <code>QH</code> change under a hotter forcing scenario, and it lets us compare neighbourhoods under the same meteorology. That is exactly the kind of controlled contrast needed for this hackathon.</p>
+          <p>The model also helps avoid a common mistake: treating "most built-up" and "highest risk" as the same thing. In this run, the most built-up core is Zheng He Towers, but the highest risk district is Kampong Lama. The physics output and the socio-economic bridge together show why: morphology shapes hazard, but people and vulnerability shape risk.</p>
+        </div>
+        <div class="panel">
+          <h3>Where the Bridge Is Useful</h3>
+          <p>The risk bridge is useful because it keeps the three pillars visible:</p>
+          <ul>
+            <li><strong>Hazard:</strong> dangerous outdoor heat from SUEWS,</li>
+            <li><strong>Exposure:</strong> how many people are in the affected district during the day,</li>
+            <li><strong>Vulnerability:</strong> who is less able to avoid or cope with heat.</li>
+          </ul>
+          <p>The geometric mean is a conservative choice. If any pillar is near zero, the combined risk falls. This prevents a low-population district from automatically becoming the top priority just because it is physically hot.</p>
+        </div>
+        <div class="panel">
+          <h3>Where the Bridge Breaks</h3>
+          <p>This bridge is not a health-impact model. It does not predict mortality, morbidity, hospital admissions, productivity loss, school disruption, or household-level harm. It is a structured screening index.</p>
+          <p>Important missing processes include:</p>
+          <ul>
+            <li><strong>Human behavioural adaptation:</strong> people change routes, shift work hours, seek shade, drink water, rest, or visit cooling spaces. The risk index cannot see those responses.</li>
+            <li><strong>Indoor exposure:</strong> SUEWS gives an outdoor environmental hazard. People spend much of the day indoors, and indoor heat depends on building design, ventilation, roof materials, occupancy, and appliance heat.</li>
+            <li><strong>Air-conditioning feedback:</strong> lack of AC is used as a vulnerability proxy, but AC use itself can add waste heat outdoors and change electricity demand. In this run <code>QF</code> is off, so that feedback is not represented.</li>
+            <li><strong>Humidity and health limits:</strong> the hazard metric uses dry-bulb <code>T2 &gt; 35 C</code>. UDA-city is hot-humid, so apparent temperature, wet-bulb temperature, or humid-heat stress could be more policy-relevant than dry-bulb air temperature alone.</li>
+            <li><strong>Relative scaling:</strong> min-max scores are relative to these 10 neighbourhoods. A risk score of zero does not mean "safe"; it means lowest relative score in this dataset under this specific bridge.</li>
+            <li><strong>Aggregation:</strong> neighbourhood averages hide individual exposure, age, health, housing quality, occupation, and social support.</li>
+            <li><strong>Scenario framing:</strong> the +2.5 C future is a pseudo-warming stress test, not a downscaled climate projection.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Practical Reading</h3>
+        <p>The safest policy reading is:</p>
+        <ol>
+          <li>Use the SUEWS outputs to identify when and where outdoor heat hazard rises.</li>
+          <li>Use the bridge to prioritise districts where heat overlaps with high exposure and vulnerability.</li>
+          <li>Treat the critical-risk districts as places for further investigation, not as final proof of health outcomes.</li>
+          <li>Extend the bridge with humid-heat metrics, indoor exposure, behavioural adaptation, and AC/waste-heat feedback before using it for operational health planning.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="data" class="section panel">
+      <h2>Data Products</h2>
+      <ul class="data-links">
+        <li><a href="hourly_fluxes_t2_present_future.csv">Hourly QH, QE, QN, QS, and T2 for present and +2.5 C runs</a></li>
+        <li><a href="heat_risk_matrix.csv">Socio-economic heat-risk matrix</a></li>
+        <li><a href="critical_heat_risk_zones.csv">Critical heat-risk zones</a></li>
+        <li><a href="risk_zone_summary.csv">Risk-zone ranking</a></li>
+        <li><a href="landcover_zone_summary.csv">Land-cover zone summary</a></li>
+        <li><a href="energy_balance_landcover_zones.csv">Present-day energy-balance summary</a></li>
+        <li><a href="meteorology_summary.csv">Meteorology summary</a></li>
+        <li><a href="seasonal_hourly_deltas_high_risk_zone.csv">Summer point-by-point high-risk-zone heat-flux deltas</a></li>
+        <li><a href="seasonal_diurnal_flux_deltas_high_risk_zone.csv">Summer diurnal high-risk-zone heat-flux deltas</a></li>
+        <li><a href="seasonal_diurnal_t2_high_risk_zone.csv">Summer diurnal high-risk-zone T2 curves</a></li>
+        <li><a href="seasonal_data_coverage_high_risk_zone.csv">Seasonal data coverage check</a></li>
+        <li><a href="https://github.com/pam-moonsap/suews-hackathon-pam24/blob/main/transcripts/prompt-history-2026-06-24.md">Prompt history and AI collaboration evidence</a></li>
+      </ul>
+    </section>
+
+    <section class="section panel">
+      <h2>Formal Citations</h2>
+      <p class="citation">Järvi, L., Grimmond, C. S. B., &amp; Christen, A. (2011). The Surface Urban Energy and Water Balance Scheme (SUEWS): Evaluation in Los Angeles and Vancouver. <em>Journal of Hydrology</em>, 411(3-4), 219-237. https://doi.org/10.1016/j.jhydrol.2011.10.001</p>
+      <p class="citation">Ward, H. C., Kotthaus, S., Järvi, L., &amp; Grimmond, C. S. B. (2016). Surface Urban Energy and Water Balance Scheme (SUEWS): Development and evaluation at two UK sites. <em>Urban Climate</em>, 18, 1-32. https://doi.org/10.1016/j.uclim.2016.05.001</p>
+    </section>
+  </main>
+</body>
+</html>
