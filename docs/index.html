@@ -304,6 +304,14 @@
       background: #ffffff;
     }
 
+    .figure-card img.diurnal-plot {
+      width: auto;
+      max-width: 100%;
+      max-height: min(54vh, 500px);
+      margin: 0 auto;
+      object-fit: contain;
+    }
+
     .figure-card p {
       margin: 12px 0 0;
       color: var(--muted);
@@ -482,6 +490,10 @@
         font-size: 1.08rem;
       }
 
+      .figure-card img.diurnal-plot {
+        max-height: 46vh;
+      }
+
       .hero-footer,
       .data-links {
         grid-template-columns: 1fr;
@@ -632,7 +644,7 @@
 
       <div class="figure-card">
         <h3>High-Risk One-Month Summer Diurnal Context</h3>
-        <img src="seasonal_diurnal_high_risk_zone_summer.png" alt="One-month summer-sample diurnal response for the high-risk zone">
+        <img class="diurnal-plot" src="seasonal_diurnal_high_risk_zone_summer.png" alt="One-month summer-sample diurnal response for the high-risk zone">
         <p>For Kampong Lama, the one-month summer-sample diurnal plot keeps <code>T2</code> as absolute present and future scenario air temperature while showing heat-flux changes as point-by-point <code>future - present</code> differences. The dotted line is the same 35 C hazard threshold used in the risk bridge. This plot is useful as context: it shows when the +2.5 C scenario crosses the dangerous-heat threshold within this month and how the energy-balance terms adjust. It is not itself the risk indicator and should not be read as a full-season summer climatology.</p>
       </div>
     </section>
