@@ -111,7 +111,7 @@ added.
 
 ### High-Risk One-Month Summer Diurnal Context
 
-![One-month summer-sample diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png?v=summer-6569e20)
+![One-month summer-sample diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone_summer.png)
 
 For Kampong Lama, the one-month summer-sample diurnal plot keeps `T2` as
 absolute present and future scenario air temperature while showing heat-flux
