@@ -25,11 +25,11 @@ only; it does not add heat to the SUEWS energy balance.
   density is the lowest in the dataset. With min-max exposure scaling, their
   aggregate risk score falls to zero. This is a feature and a limitation of the
   chosen relative indicator.
-- **Seasonal scope:** The saved hourly analysis output is a **one-month spring
-  sample**, not a full spring-season estimate: `2024-03-16 00:00` to
+- **Seasonal scope:** The saved hourly analysis output is a **one-month summer
+  sample**, not a full summer-season estimate: `2024-03-16 00:00` to
   `2024-04-15 00:00`, giving 721 hourly values per scenario and
-  neighbourhood. Winter, summer, autumn, and the rest of spring are not present
-  in the current output.
+  neighbourhood. Other months/seasons and the rest of summer are not present in
+  the current output.
 - **Science interpretation:** The model is strongest for comparing land-cover
   and morphology effects on outdoor heat and energy partitioning. It does not
   represent behaviour, health outcomes, indoor exposure, adaptive action, or AC
@@ -48,7 +48,7 @@ socio-economic data. Meteorology is shared across districts.
 | Model city | UDA-city synthetic hot-humid city |
 | Scenarios | Present hot-humid; +2.5 C future pseudo-warming |
 | Spin-up discarded | 14 days |
-| Analysis period used here | One-month spring sample: 2024-03-16 to 2024-04-15 |
+| Analysis period used here | One-month summer sample: 2024-03-16 to 2024-04-15 |
 | Analysis hours per scenario/neighbourhood | 721 |
 | Hazard metric | Count of hourly mean `T2 > 35 C` after spin-up |
 | Risk bridge exposure | Daytime population density |
@@ -56,9 +56,9 @@ socio-economic data. Meteorology is shared across districts.
 
 The raw forcing files extend from day-of-year 62 to 153 in 2024, but this
 practice analysis used a compact run to stay within desktop memory limits. The
-results should therefore be read as a **one-month spring sample / stress-test
-window**, not as a representative average for the whole spring season. The
-seasonal coverage file confirms that only this spring-month window is present
+results should therefore be read as a **one-month summer sample / stress-test
+window**, not as a representative average for the whole summer season. The
+seasonal coverage file confirms that only this summer-labeled one-month window is present
 after spin-up.
 
 ### Urban Form Contrast
@@ -109,17 +109,17 @@ are physically hot in the SUEWS output, but the densest and most deprived
 hotspot districts become most important after exposure and vulnerability are
 added.
 
-### High-Risk One-Month Spring Diurnal Context
+### High-Risk One-Month Summer Diurnal Context
 
-![One-month spring-sample diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
+![One-month summer-sample diurnal response for the high-risk zone](seasonal_diurnal_high_risk_zone.png)
 
-For Kampong Lama, the one-month spring-sample diurnal plot keeps `T2` as
+For Kampong Lama, the one-month summer-sample diurnal plot keeps `T2` as
 absolute present and future scenario air temperature while showing heat-flux
 changes as point-by-point `future - present` differences. The dotted line is
 the same 35 C hazard threshold used in the risk bridge. This plot is useful as
 context: it shows when the +2.5 C scenario crosses the dangerous-heat threshold
 within this month and how the energy-balance terms adjust. It is not itself the
-risk indicator and should not be read as a full-season spring climatology.
+risk indicator and should not be read as a full-season summer climatology.
 
 ## 3. Socio-Economic Risk Translation Matrix
 
@@ -291,9 +291,9 @@ The safest policy reading is:
 - [Land-cover zone summary](landcover_zone_summary.csv)
 - [Present-day energy-balance summary](energy_balance_landcover_zones.csv)
 - [Meteorology summary](meteorology_summary.csv)
-- [Spring point-by-point high-risk-zone heat-flux deltas](seasonal_hourly_deltas_high_risk_zone.csv)
-- [Spring diurnal high-risk-zone heat-flux deltas](seasonal_diurnal_flux_deltas_high_risk_zone.csv)
-- [Spring diurnal high-risk-zone T2 curves](seasonal_diurnal_t2_high_risk_zone.csv)
+- [Summer point-by-point high-risk-zone heat-flux deltas](seasonal_hourly_deltas_high_risk_zone.csv)
+- [Summer diurnal high-risk-zone heat-flux deltas](seasonal_diurnal_flux_deltas_high_risk_zone.csv)
+- [Summer diurnal high-risk-zone T2 curves](seasonal_diurnal_t2_high_risk_zone.csv)
 - [Seasonal data coverage check](seasonal_data_coverage_high_risk_zone.csv)
 - [Prompt history and AI collaboration evidence](https://github.com/pam-moonsap/suews-hackathon-pam24/blob/main/transcripts/prompt-history-2026-06-24.md)
 

@@ -25,14 +25,14 @@ SCENARIO_LABELS = {
     "present": "Present",
     "future_plus_2p5c": "+2.5 C future",
 }
-SEASON_ORDER = ["Winter", "Spring", "Summer", "Autumn"]
+SEASON_ORDER = ["Winter", "Summer", "Autumn"]
 SEASON_BY_MONTH = {
     12: "Winter",
     1: "Winter",
     2: "Winter",
-    3: "Spring",
-    4: "Spring",
-    5: "Spring",
+    3: "Summer",
+    4: "Summer",
+    5: "Summer",
     6: "Summer",
     7: "Summer",
     8: "Summer",
@@ -544,16 +544,16 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         "future_plus_2p5c": "+2.5 C T2",
     }
 
-    spring_delta = diurnal[diurnal["season"].eq("Spring")]
-    spring_t2 = t2_diurnal[t2_diurnal["season"].eq("Spring")]
-    spring_coverage = coverage[
-        coverage["season"].eq("Spring") & coverage["scenario"].eq("present")
+    summer_delta = diurnal[diurnal["season"].eq("Summer")]
+    summer_t2 = t2_diurnal[t2_diurnal["season"].eq("Summer")]
+    summer_coverage = coverage[
+        coverage["season"].eq("Summer") & coverage["scenario"].eq("present")
     ].iloc[0]
 
     fig, ax = plt.subplots(figsize=(11, 7))
     ax2 = ax.twinx()
     ax.set_title(
-        "One-month spring-sample diurnal response",
+        "One-month summer-sample diurnal response",
         loc="left",
         fontsize=14,
         weight="bold",
@@ -567,11 +567,11 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
     ax.spines[["top", "right"]].set_visible(False)
     ax2.spines["top"].set_visible(False)
 
-    if spring_delta.empty or spring_t2.empty:
+    if summer_delta.empty or summer_t2.empty:
         ax.text(
             0.5,
             0.5,
-            "No Spring data in current run",
+            "No Summer data in current run",
             transform=ax.transAxes,
             ha="center",
             va="center",
@@ -581,13 +581,13 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
     else:
         for col in ["QN", "QS", "QE", "QH"]:
             ax.plot(
-                spring_delta["hour"],
-                spring_delta[col],
+                summer_delta["hour"],
+                summer_delta[col],
                 color=flux_colors[col],
                 linewidth=2.5,
             )
         for scenario in ["present", "future_plus_2p5c"]:
-            group = spring_t2[spring_t2["scenario"].eq(scenario)]
+            group = summer_t2[summer_t2["scenario"].eq(scenario)]
             ax2.plot(
                 group["hour"],
                 group["T2"],
@@ -607,9 +607,9 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
             0.02,
             0.96,
             (
-                "Spring-month sample only\n"
-                f"{spring_coverage['first_time']} to {spring_coverage['last_time']}\n"
-                f"{spring_coverage['n_hours']} hourly values after spin-up"
+                "Summer-month sample only\n"
+                f"{summer_coverage['first_time']} to {summer_coverage['last_time']}\n"
+                f"{summer_coverage['n_hours']} hourly values after spin-up"
             ),
             transform=ax.transAxes,
             ha="left",
@@ -645,7 +645,7 @@ def plot_seasonal_diurnal(hourly: pd.DataFrame, risk: pd.DataFrame) -> Path:
         ),
     ]
     fig.suptitle(
-        f"One-month spring-sample diurnal response: {zone_name} (gridiv {grid})",
+        f"One-month summer-sample diurnal response: {zone_name} (gridiv {grid})",
         x=0.02,
         ha="left",
         fontsize=16,

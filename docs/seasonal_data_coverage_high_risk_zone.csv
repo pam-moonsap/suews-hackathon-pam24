@@ -1,9 +1,7 @@
 season,scenario,first_time,last_time,n_hours
 Winter,present,,,0
 Winter,future_plus_2p5c,,,0
-Spring,present,2024-03-16,2024-04-15,721
-Spring,future_plus_2p5c,2024-03-16,2024-04-15,721
-Summer,present,,,0
-Summer,future_plus_2p5c,,,0
+Summer,present,2024-03-16,2024-04-15,721
+Summer,future_plus_2p5c,2024-03-16,2024-04-15,721
 Autumn,present,,,0
 Autumn,future_plus_2p5c,,,0
