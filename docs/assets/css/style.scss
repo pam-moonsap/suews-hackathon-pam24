@@ -14,23 +14,23 @@ body {
 }
 
 .markdown-body {
-  font-size: 18px;
-  line-height: 1.65;
+  font-size: 21px !important;
+  line-height: 1.7 !important;
 }
 
 .markdown-body h1 {
-  font-size: 2.6rem;
-  line-height: 1.15;
+  font-size: 3.1rem !important;
+  line-height: 1.12 !important;
 }
 
 .markdown-body h2 {
   margin-top: 2.2rem;
-  font-size: 2rem;
+  font-size: 2.35rem !important;
 }
 
 .markdown-body h3 {
   margin-top: 1.8rem;
-  font-size: 1.45rem;
+  font-size: 1.7rem !important;
 }
 
 .markdown-body img {
@@ -44,7 +44,7 @@ body {
 .markdown-body table {
   display: table;
   width: 100%;
-  font-size: 0.95em;
+  font-size: 0.9em;
 }
 
 .markdown-body th,
@@ -60,15 +60,15 @@ body {
   }
 
   .markdown-body {
-    font-size: 16px;
+    font-size: 17px !important;
   }
 
   .markdown-body h1 {
-    font-size: 2rem;
+    font-size: 2.1rem !important;
   }
 
   .markdown-body h2 {
-    font-size: 1.55rem;
+    font-size: 1.65rem !important;
   }
 
   .markdown-body table {
